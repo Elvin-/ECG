@@ -24,8 +24,17 @@ $(function() {
     // create the chart
     window.chart = new Highcharts.StockChart({
         chart: {
-            renderTo: 'container',
+            alignTicks: true, //多轴时 是否自动计算刻度 (默认： true)
+            animation: true,//是否开启动画
+            renderTo: 'container', //对应的div id
+            //backgroundColor: '#fff', //设置背景颜色 （可以设置渐变）
+            borderColor: '#ddd', //图表外边框的颜色
+            // borderRadius: 30, //图表外边框圆角
+            borderWidth: '1', //图表外边框的宽度
+            className: 'testClass', //给图表所在div设置一个css class类
+            //defaultSeriesType: 'ser1', //type 的别名
             // zoomType: 'x',
+            //一些事件 比如addSeries, click, load,redraw, selection
             events: {
                 load: function() {
                     var chart = this;
@@ -49,7 +58,9 @@ $(function() {
                         $report.html('Selection reset');
                     }
                 },
-            }
+            },
+            height:  '600' , //显示的设置图表div的高度 注意 不需要加单位 (默认px)  
+
         },
         rangeSelector: {
             buttons: [{
@@ -91,14 +102,14 @@ $(function() {
         yAxis: {
             startOnTick: false,
             endOnTick: false,
-            min: 700,
-            max: 1500,
+            min: 900,  
+            max: 1300,
             tickInterval: 1, 
             gridLineWidth: 1,
             gridLineColor: '#ed7b10',
             
             labels: {
-                enabled: false
+                enabled: true //是否显示y轴
             }
         },
         tooltip: {
@@ -107,16 +118,16 @@ $(function() {
         xAxis: {
             startOnTick: false,
             endOnTick: false,
-            minRange: 1 * 1000,
+            minRange: 500, //最小放大比例
             tickLength: 0,
-            tickInterval: 0.04,
+            tickInterval: 1,
             gridLineWidth: 1,
             gridLineColor: '#ed7b10',
             minorGridLineColor: '#b0a091',
             minorGridLineWidth: 0.5,
             minorTickInterval: 'auto',
             labels: {
-                enabled: false
+                enabled: true //是否显示x轴
             }
 
         },
