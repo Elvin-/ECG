@@ -60,6 +60,7 @@ $(function() {
                 },
             },
             height:  '600' , //显示的设置图表div的高度 注意 不需要加单位 (默认px)  
+            //inverted: true, //是否倒置轴 
 
         },
         rangeSelector: {
@@ -70,6 +71,12 @@ $(function() {
             }, {
                 type: 'all',
                 text: '全部'
+            }, {
+                type: 'text',
+                text: '<a>删除</a>',
+                onclick: function() {
+                    console.log('hello world');
+                }
             }],
             buttonTheme: {
                 width: 50

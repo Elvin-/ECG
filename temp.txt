@@ -1,0 +1,6 @@
+渐变色： http://jsfiddle.net/gh/get/jquery/1.9.1/highslide-software/highcharts.com/tree/master/samples/highcharts/demo/pie-monochrome/
+不错的博客 : http://www.stepday.com/
+:http://hao.uisdc.com/
+http://www.peng8.net/categories/Highcharts/page/2/
+字体：http://fontawesome.io/icons/
+响应式教程: http://wf.uisdc.com/cn/layouts/rwd-fundamentals/

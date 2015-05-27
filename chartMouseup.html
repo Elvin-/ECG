@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Highcharts右键菜单的实现示例呈现</title>
+    <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <style>
+        #chartMenu
+        {
+            font-family: Arial;
+            border: 5px solid #dedede;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            padding:5px;
+            height: 100px;
+            width: 150px;
+            position:absolute;
+            z-index:9999;
+            background-color:#dedede;
+        }
+        #chartMenu a, a:link,a:active,a:visited
+        {
+           font-size:18px;
+           color:#000;
+        }
+        #chartMenu a:hover
+        {
+           color:blue;  
+        }
+    </style>
+    <script type="text/javascript">
+        var chart = null;
+        var vData = new Array();
+        var str = "7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6";
+        vData = str.split(',');
+        for (var i = 0; i < vData.length; i++) {
+            vData[i] = parseInt(vData[i]);
+        }
+        $(function () {
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'container',
+                        type: 'line',
+                        events: {
+                            //单击图表隐藏右键菜单
+                            click: function () {
+                                HideRightMenu();
+                            }
+                        }
+                    },
+                    title: {
+                        text: 'Highcharts图表右键菜单实现示例',
+                        x: -20 //center
+                    },
+                    subtitle: {
+                        text: 'From: www.stepday.com',
+                        x: -20
+                    },
+                    xAxis: {
+                        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Temperature (°C)'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.series.name + '</b><br/>' +
+                        this.x + ': ' + this.y + '°C';
+                        }
+                    },
+                    credits: {
+                        text: "www.stepday.com",
+                        href: "http://www.stepday.com",
+                        style: {
+                            color:"red"
+                        }
+                    },
+                    exporting: {
+                        enabled:false
+                    },
+                    series: [{
+                        name: 'Tokyo',
+                        data: eval("[" + str + "]")
+                    }, {
+                        name: 'Tokyo23',
+                        data: eval("[" + str + "]")
+                    }]
+                });
+            });
+            //图表事件注册
+            RegChartRightClickEvents();
+        });
+        //注册图表右键事件
+        function RegChartRightClickEvents() {
+            //图表容器的右键鼠标事件
+            $("#container").bind("mouseup", function (oEvent) {
+                if (!oEvent) oEvent = window.event;
+                if (oEvent.button == 2) {
+                    //动态控制菜单的绝对位置
+                    $("#chartMenu").css("top", oEvent.clientY);
+                    $("#chartMenu").css("left", oEvent.clientX);
+                    $("#chartMenu").show();                    
+                }
+            });
+            //整个页面的右键文本目录事件
+            $(document).bind("contextmenu", function (event) {
+                if (document.all)
+                    window.event.returnValue = false; // for IE  
+                else
+                    event.preventDefault();
+            });
+            //默认设置菜单隐藏
+            $("#chartMenu").hide();
+        }
+
+        //隐藏图表右键菜单
+        function HideRightMenu() {
+            $("#chartMenu").hide();
+        }
+
+        //导出图表
+        function ExportChart() {
+            debugger
+            chart.exportChart({
+                type:"image/png",
+                filename:"右键菜单导出图标示例"
+            });
+            HideRightMenu();
+        }          
+		</script>
+</head>
+<body>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/stock/highstock.js"></script>
+	<script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
+    <div id="container" style="width: 400px; height: 400px; margin: 0 auto">
+    </div>
+    <div id="chartMenu">
+      <div>
+        <a href="javascript:void(0)" onclick="ExportChart()">导出图表</a>
+      </div>
+      <div>
+        <a href="javascript:void(0)" onclick="ExportChart()">图表重画</a>
+      </div>
+      <div>
+        <a href="javascript:void(0)" onclick="ExportChart()">动态追加Series</a>
+      </div>
+      <div>
+        <a href="javascript:void(0)" onclick="ExportChart()">动态修改标题</a>
+      </div>
+    </div>
+</body>
+</html>
