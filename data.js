@@ -24,14 +24,14 @@ $(function() {
     // create the chart
     window.chart = new Highcharts.StockChart({
         chart: {
-            alignTicks: true, //多轴时 是否自动计算刻度 (默认： true)
-            animation: true,//是否开启动画
+            // alignTicks: true, //多轴时 是否自动计算刻度 (默认： true)
+            // animation: true,//是否开启动画
             renderTo: 'container', //对应的div id
             //backgroundColor: '#fff', //设置背景颜色 （可以设置渐变）
             borderColor: '#ddd', //图表外边框的颜色
             // borderRadius: 30, //图表外边框圆角
             borderWidth: '1', //图表外边框的宽度
-            className: 'testClass', //给图表所在div设置一个css class类
+            // className: 'testClass', //给图表所在div设置一个css class类
             //defaultSeriesType: 'ser1', //type 的别名
             // zoomType: 'x',
             //一些事件 比如addSeries, click, load,redraw, selection
@@ -50,34 +50,36 @@ $(function() {
                 //             'y: ' + event.yAxis[0].value
                 //     );
                 // },
-                selection: function (event) {
-                    if (event.xAxis) {
-                        $report.html('Last selection:<br/>min: ' + event.xAxis[0].min +
-                            ', max: ' + event.xAxis[0].max);
-                    } else {
-                        $report.html('Selection reset');
-                    }
-                },
+                // selection: function (event) {
+                //     if (event.xAxis) {
+                //         $report.html('Last selection:<br/>min: ' + event.xAxis[0].min +
+                //             ', max: ' + event.xAxis[0].max);
+                //     } else {
+                //         $report.html('Selection reset');
+                //     }
+                // },
             },
-            height:  '600' , //显示的设置图表div的高度 注意 不需要加单位 (默认px)  
+            // height:  '600' , //显示的设置图表div的高度 注意 不需要加单位 (默认px)  
             //inverted: true, //是否倒置轴 
 
         },
         rangeSelector: {
             buttons: [{
-                type: 'millisecond',
+                type: 'second',
                 count: 10,
-                text: '10ms'
+                text: '10s'
             }, {
                 type: 'all',
                 text: '全部'
-            }, {
-                type: 'text',
-                text: '<a>删除</a>',
-                onclick: function() {
-                    console.log('hello world');
-                }
-            }],
+            }
+            // , {
+            //     type: 'text',
+            //     text: '<a>删除</a>',
+            //     onclick: function() {
+            //         console.log('hello world');
+            //     }
+                // }
+            ],
             buttonTheme: {
                 width: 50
             },
@@ -120,19 +122,19 @@ $(function() {
             }
         },
         tooltip: {
-            enabled: false
+            enabled: true
         },
         xAxis: {
             startOnTick: false,
             endOnTick: false,
-            minRange: 500, //最小放大比例
-            tickLength: 0,
-            tickInterval: 1,
-            gridLineWidth: 1,
-            gridLineColor: '#ed7b10',
-            minorGridLineColor: '#b0a091',
-            minorGridLineWidth: 0.5,
-            minorTickInterval: 'auto',
+            minRange: 5000, //最小放大比例 5S
+            tickLength: 0, //刻度线的长度
+            tickInterval: 200, //每大格0.2S
+            gridLineWidth: 1, //网格线的宽度
+            gridLineColor: '#ed7b10', //网格线的颜色
+            minorGridLineColor: '#b0a091', //次级网格线的颜色
+            minorGridLineWidth: 0.5, //次级网格线的宽度
+            minorTickInterval: 40, //次级网格的间距 0.04S
             labels: {
                 enabled: true //是否显示x轴
             }
@@ -146,11 +148,11 @@ $(function() {
                     enabled: false
                 }
             },
-            pointInterval: 4, // 250Hz
+            pointInterval: 40, // 每0.04S 一个电压
             groupPixelWidth: .5,
             data: data,
             zones: [{
-                color: '#000'
+                color: '#000' //设置折现的颜色
             }],
             dataGrouping: {
                 enabled: true,
