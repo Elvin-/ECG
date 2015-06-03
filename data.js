@@ -1,59 +1,53 @@
 $(function() {
-    console.log($("#container").length > 0);
+    //Highcharts 全局设置 语言
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        },
+        lang: {
+            contextButtonTitle: '图表导出菜单',
+            downloadJPEG: '导出JPG格式图片',
+            downloadPDF: '导出PDF格式文档',
+            downloadPNG: '导出PNG格式图片',
+            downloadSVG: '导出SVG矢量图',
+            printChart: '打印图表',
+            rangeSelectorZoom: ' ',
+            resetZoom: '重置缩放',
+            loading: '加载中',
+            rangeSelectorFrom: '从',
+            rangeSelectorTo: '至',
+            months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+            weekdays: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天']
+        }
+    });
     if ($("#container").length > 0) {
         var $report = $('#report');
         var data = getData();
         var gInfo;
-        //Highcharts 全局设置 语言
-        Highcharts.setOptions({
-            lang: {
-                contextButtonTitle: '图表导出菜单',
-                downloadJPEG: '导出JPG格式图片',
-                downloadPDF: '导出PDF格式文档',
-                downloadPNG: '导出PNG格式图片',
-                downloadSVG: '导出SVG矢量图',
-                printChart: '打印图表',
-                rangeSelectorZoom: '缩放',
-                resetZoom: '重置缩放',
-                loading: '加载中',
-                rangeSelectorFrom: '从',
-                rangeSelectorTo: '至',
-                months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
-                weekdays: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天']
-            }
-        });
+
 
         // 创建highcharts 
         window.chart = new Highcharts.StockChart({
             chart: {
-                // animation: true,//是否开启动画
                 renderTo: 'container', //对应的div id
-                // backgroundColor: '#EEEEEE', //设置背景颜色 （可以设置渐变）
-                // borderColor: '#ddd', //图表外边框的颜色
-                // borderRadius: 30, //图表外边框圆角
                 borderWidth: '1', //图表外边框的宽度
-                //一些事件 比如addSeries, click, load,redraw, selection
-                events: {
-                    load: function() {
-                        var chart = this;
-                        setTimeout(function() {
-                            var min = chart.xAxis[0].getExtremes().min;
-                            chart.xAxis[0].setExtremes(min, min + 2 * 1000)
-                        }, 1000);
-                    }
-                }
-
+                panning: false, //禁用放大
+                pinchType: '', //禁用手势操作
+                zoomType: "",
             },
             //选中缩放的地方
             rangeSelector: {
-                buttons: [{
-                    type: 'second',
-                    count: 2,
-                    text: '1秒'
-                }, {
-                    type: 'all',
-                    text: '全部'
-                }],
+                inputEnabled: true,
+                buttons: [
+                    // {
+                    //     type: 'second',
+                    //     count: 2,
+                    //     text: '1秒'
+                    // }, {
+                    //     type: 'all',
+                    //     text: '全部'
+                    // }
+                ],
                 buttonTheme: {
                     width: 50
                 },
@@ -76,10 +70,13 @@ $(function() {
             },
             //图表缩放导航
             navigator: {
-                enabled: true,
+                enabled: false,
+            },
+            exporting: {
+                enabled: false
             },
             title: {
-                text: 'ECG'
+                text: ' '
             },
             yAxis: {
                 min: -2000,
@@ -90,17 +87,18 @@ $(function() {
                 minorGridLineWidth: 0.5, //次级网格线的宽度 0.5
                 minorGridLineColor: '#b0a091', //次级网格线的颜色 b0a091
                 minorTickInterval: 100, //次级网格的间隔 0.1毫伏 
-
                 labels: {
                     enabled: false //是否显示y轴
                 }
             },
             tooltip: {
                 enabled: false,
-                // valueDecimals: 2
+                crosshairs: false //跟随光标的精准线
             },
             xAxis: {
-                minRange: 2000, //最小放大比例 1S
+                type: 'datetime',
+                // min : startdt, //起始时间
+                // minRange: 2000, //最小放大比例 1S
                 tickPixelInterval: 100, //网格间隔宽度默认100
                 tickLength: 0, //刻度线的长度
                 tickInterval: 200, //每大格0.2S
@@ -114,9 +112,18 @@ $(function() {
                 }
 
             },
-
+            //设置鼠标一上去时不显示点
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: false
+                    },
+                    enableMouseTracking: false
+                }
+            },
             series: [{
-                type: 'spline',
+                type: 'line',
+                //设置鼠标一上去时不显示点
                 states: {
                     hover: {
                         enabled: false
@@ -137,58 +144,118 @@ $(function() {
                 //     align: 'right'
                 // }
             },
-            // scrollbar: {
-            //     barBackgroundColor: 'gray',
-            //     barBorderRadius: 7,
-            //     barBorderWidth: 0,
-            //     buttonBackgroundColor: 'gray',
-            //     buttonBorderWidth: 0,
-            //     buttonArrowColor: 'yellow',
-            //     buttonBorderRadius: 7,
-            //     rifleColor: 'yellow',
-            //     trackBackgroundColor: 'white',
-            //     trackBorderWidth: 1,
-            //     trackBorderColor: 'silver',
-            //     trackBorderRadius: 7
-            // }
+            scrollbar: {
+                enabled: false, //禁用
+                barBackgroundColor: 'gray',
+                barBorderRadius: 7,
+                barBorderWidth: 0,
+                buttonBackgroundColor: 'gray',
+                buttonBorderWidth: 0,
+                buttonArrowColor: 'yellow',
+                buttonBorderRadius: 7,
+                rifleColor: 'yellow',
+                trackBackgroundColor: 'white',
+                trackBorderWidth: 1,
+                trackBorderColor: 'silver',
+                trackBorderRadius: 7
+            }
         });
     }
     if ($("#instantChart").length > 0) {
+        var startDt, endDt;
         $(function() {
             $('#instantChart').highcharts({
                 chart: {
-                    type: 'line'
+                    type: 'line',
+                    plotBackgroundColor: 'rgba(238, 254, 238, 1)',
+                    plotBorderColor: '#000',
+                    plotBorderWidth: 1,
                 },
                 title: {
-                    text: 'Monthly Average Temperature'
-                },
-                subtitle: {
-                    text: 'Source: WorldClimate.com'
+                    text: ' ',
                 },
                 xAxis: {
-                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    labels: {
+                        // step: 2,
+                    },
+                    type: 'datetime',
+                    tickWidth: 1,
+                    tickLength: 5,
+                    tickColor: '#000',
+                    lineColor: '#000',
+                    lineWidth: 1,
                 },
                 yAxis: {
+                    // offset: 5,
+                    min: 0,
+                    max: 175,
+                    tickInterval: 25, //每大格25
+                    gridLineWidth: 0,
+                    tickWidth: 1,
+                    tickLength: 5,
+                    tickColor: '#000',
+                    // lineColor: '#000',
+                    // lineWidth: 1,
                     title: {
-                        text: 'Temperature (°C)'
-                    }
+                        text: ' '
+                    },
+                    plotLines: [{
+                        value: 50,
+                        width: 1,
+                        color: 'red',
+                        zIndex: 1,
+                        label: {
+                            text: '正常值范围',
+                            y: -20,
+                            align: 'center',
+                            style: {
+                                color: 'red',
+                                fontSize: 18
+                            },
+
+                        }
+                    }, {
+                        value: 100,
+                        width: 1,
+                        color: 'red'
+                    }, ]
                 },
+
                 plotOptions: {
                     line: {
                         dataLabels: {
-                            enabled: false
+                            enabled: false,
                         },
-                        enableMouseTracking: false
+                        enableMouseTracking: false,
+                        marker: {
+                            enabled: false,
+                        }
                     }
                 },
+                exporting: {
+                    enabled: false
+                },
                 series: [{
-                    name: 'Tokyo',
-                    data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-                }, {
-                    name: 'London',
-                    data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-                }]
+                    data: [75, 74, 77, 70, 72, 73, 73, 75, 73, 74, 73, 77],
+                    pointStart: 1433233483000,
+                    pointInterval: 10 * 1000,
+                    lineWidth: 1,
+                    zones: [{
+                        color: '#000' //设置折线的颜色
+                    }],
+                }],
+                credits: {
+                    enabled: false,
+                },
+                legend: {
+                    enabled: false,
+                },
             });
+var  chart = $('#instantChart').highcharts();
+            chart.setTitle({
+                text: Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.min) + " 至 " + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.max)
+            });
+
         });
     }
 
