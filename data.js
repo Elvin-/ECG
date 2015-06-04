@@ -162,100 +162,285 @@ $(function() {
         });
     }
     if ($("#instantChart").length > 0) {
-        var startDt, endDt;
-        $(function() {
-            $('#instantChart').highcharts({
-                chart: {
-                    type: 'line',
-                    plotBackgroundColor: 'rgba(238, 254, 238, 1)',
-                    plotBorderColor: '#000',
-                    plotBorderWidth: 1,
+        $('#instantChart').highcharts({
+            chart: {
+                type: 'line',
+                plotBackgroundColor: 'rgba(238, 254, 238, 1)',
+                plotBorderColor: '#000',
+                plotBorderWidth: 1,
+            },
+            title: {
+                text: ' ',
+            },
+            xAxis: {
+                labels: {
+                    // step: 2,
                 },
+                type: 'datetime',
+                tickWidth: 1,
+                tickLength: 5,
+                tickColor: '#000',
+                lineColor: '#000',
+                lineWidth: 1,
+            },
+            yAxis: {
+                // offset: 5,
+                min: 0,
+                max: 175,
+                tickInterval: 25, //每大格25
+                gridLineWidth: 0,
+                tickWidth: 1,
+                tickLength: 5,
+                tickColor: '#000',
+                // lineColor: '#000',
+                // lineWidth: 1,
                 title: {
-                    text: ' ',
+                    text: ' '
                 },
-                xAxis: {
-                    labels: {
-                        // step: 2,
-                    },
-                    type: 'datetime',
-                    tickWidth: 1,
-                    tickLength: 5,
-                    tickColor: '#000',
-                    lineColor: '#000',
-                    lineWidth: 1,
-                },
-                yAxis: {
-                    // offset: 5,
-                    min: 0,
-                    max: 175,
-                    tickInterval: 25, //每大格25
-                    gridLineWidth: 0,
-                    tickWidth: 1,
-                    tickLength: 5,
-                    tickColor: '#000',
-                    // lineColor: '#000',
-                    // lineWidth: 1,
-                    title: {
-                        text: ' '
-                    },
-                    plotLines: [{
-                        value: 50,
-                        width: 1,
-                        color: 'red',
-                        zIndex: 1,
-                        label: {
-                            text: '正常值范围',
-                            y: -20,
-                            align: 'center',
-                            style: {
-                                color: 'red',
-                                fontSize: 18
-                            },
-
-                        }
-                    }, {
-                        value: 100,
-                        width: 1,
-                        color: 'red'
-                    }, ]
-                },
-
-                plotOptions: {
-                    line: {
-                        dataLabels: {
-                            enabled: false,
+                plotLines: [{
+                    value: 50,
+                    width: 1,
+                    color: 'red',
+                    zIndex: 1,
+                    label: {
+                        text: '正常值范围',
+                        y: -20,
+                        align: 'center',
+                        style: {
+                            color: 'red',
+                            fontSize: 18
                         },
-                        enableMouseTracking: false,
-                        marker: {
-                            enabled: false,
-                        }
-                    }
-                },
-                exporting: {
-                    enabled: false
-                },
-                series: [{
-                    data: [75, 74, 77, 70, 72, 73, 73, 75, 73, 74, 73, 77],
-                    pointStart: 1433233483000,
-                    pointInterval: 10 * 1000,
-                    lineWidth: 1,
-                    zones: [{
-                        color: '#000' //设置折线的颜色
-                    }],
-                }],
-                credits: {
-                    enabled: false,
-                },
-                legend: {
-                    enabled: false,
-                },
-            });
-var  chart = $('#instantChart').highcharts();
-            chart.setTitle({
-                text: Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.min) + " 至 " + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.max)
-            });
 
+                    }
+                }, {
+                    value: 100,
+                    width: 1,
+                    color: 'red'
+                }, ]
+            },
+
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    enableMouseTracking: false,
+                    marker: {
+                        enabled: false,
+                    }
+                }
+            },
+            exporting: {
+                enabled: false
+            },
+            series: [{
+                data: [75, 74, 77, 70, 72, 73, 73, 75, 73, 74, 73, 77],
+                pointStart: 1433233483000,
+                pointInterval: 10 * 1000,
+                lineWidth: 1,
+                zones: [{
+                    color: '#000' //设置折线的颜色
+                }],
+            }],
+            credits: {
+                enabled: false,
+            },
+            legend: {
+                enabled: false,
+            },
+        });
+        var chart = $('#instantChart').highcharts();
+        chart.setTitle({
+            text: Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.min) + " 至 " + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.max)
+        });
+    }
+
+    if ($("#sphygmusChart").length > 0) {
+        var startDt, endDt;
+        $('#sphygmusChart').highcharts({
+            chart: {
+                type: 'line',
+                plotBackgroundColor: 'rgba(238, 254, 238, 1)',
+                plotBorderColor: '#000',
+                plotBorderWidth: 1,
+            },
+            title: {
+                text: ' ',
+            },
+            xAxis: {
+                labels: {
+                    // step: 2,
+                },
+                type: 'datetime',
+                tickWidth: 1,
+                tickLength: 5,
+                tickColor: '#000',
+                lineColor: '#000',
+                lineWidth: 1,
+            },
+            yAxis: {
+                // offset: 5,
+                min: 0,
+                max: 88,
+                tickInterval: 22, //每大格22
+                gridLineWidth: 0,
+                tickWidth: 1,
+                tickLength: 5,
+                tickColor: '#000',
+                // lineColor: '#000',
+                // lineWidth: 1,
+                title: {
+                    text: ' '
+                },
+                // plotLines: [{
+                //     value: 50,
+                //     width: 1,
+                //     color: 'red',
+                //     zIndex: 1,
+                //     label: {
+                //         text: '正常值范围',
+                //         y: -20,
+                //         align: 'center',
+                //         style: {
+                //             color: 'red',
+                //             fontSize: 18
+                //         },
+
+                //     }
+                // }, {
+                //     value: 100,
+                //     width: 1,
+                //     color: 'red'
+                // }, ]
+            },
+
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    enableMouseTracking: false,
+                    marker: {
+                        enabled: false,
+                    }
+                }
+            },
+            exporting: {
+                enabled: false
+            },
+            series: [{
+                data: [67, 68, 69, 45, 43, 42, 22, 21, 22, 23, 45, 67],
+                pointStart: 1433233483000,
+                pointInterval: 10 * 1000,
+                lineWidth: 1,
+                zones: [{
+                    color: '#000' //设置折线的颜色
+                }],
+            }],
+            credits: {
+                enabled: false,
+            },
+            legend: {
+                enabled: false,
+            },
+        });
+        var chart = $('#sphygmusChart').highcharts();
+        chart.setTitle({
+            text: Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.min) + " 至 " + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.max)
+        });
+    }
+
+        if ($("#instantSphygmusChart").length > 0) {
+        $('#instantSphygmusChart').highcharts({
+            chart: {
+                type: 'line',
+                plotBackgroundColor: 'rgba(238, 254, 238, 1)',
+                plotBorderColor: '#000',
+                plotBorderWidth: 1,
+            },
+            title: {
+                text: ' ',
+            },
+            xAxis: {
+                labels: {
+                    // step: 2,
+                },
+                type: 'datetime',
+                tickWidth: 1,
+                tickLength: 5,
+                tickColor: '#000',
+                lineColor: '#000',
+                lineWidth: 1,
+            },
+            yAxis: {
+                // offset: 5,
+                min: 0,
+                max: 175,
+                tickInterval: 25, //每大格25
+                gridLineWidth: 0,
+                tickWidth: 1,
+                tickLength: 5,
+                tickColor: '#000',
+                // lineColor: '#000',
+                // lineWidth: 1,
+                title: {
+                    text: ' '
+                },
+                plotLines: [{
+                    value: 50,
+                    width: 1,
+                    color: 'red',
+                    zIndex: 1,
+                    label: {
+                        text: '正常值范围',
+                        y: -20,
+                        align: 'center',
+                        style: {
+                            color: 'red',
+                            fontSize: 18
+                        },
+
+                    }
+                }, {
+                    value: 100,
+                    width: 1,
+                    color: 'red'
+                }, ]
+            },
+
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    enableMouseTracking: false,
+                    marker: {
+                        enabled: false,
+                    }
+                }
+            },
+            exporting: {
+                enabled: false
+            },
+            series: [{
+                data: [75, 74, 77, 70, 72, 73, 73, 75, 73, 74, 73, 77],
+                pointStart: 1433233483000,
+                pointInterval: 10 * 1000,
+                lineWidth: 1,
+                zones: [{
+                    color: '#000' //设置折线的颜色
+                }],
+            }],
+            credits: {
+                enabled: false,
+            },
+            legend: {
+                enabled: false,
+            },
+        });
+        var chart = $('#instantSphygmusChart').highcharts();
+        chart.setTitle({
+            text: Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.min) + " 至 " + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', chart.series[0].xAxis.max)
         });
     }
 
