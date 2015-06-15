@@ -1,5 +1,6 @@
 $(function() {
     //Highcharts 全局设置 语言
+    
     Highcharts.setOptions({
         global: {
             useUTC: false
