@@ -39,14 +39,14 @@ function setChart(id, objDt) {
 
     var Hz = 1000 / objDt.fs; // objDt.fs
     var startdt = objDt.measureTime;
-    var startTime = "";
+    var startTime = "";	
     var endTime = "";
     var pageDt = 6 * (objDt.page - 1) * 1000;
     var maxValue = 2000;
     var minValue = -2000;
 
     startdt += pageDt;
-
+    console.log(startdt);
     switch (objDt.type) {
         case "ab_ecg":
             Hz = 6000 / objDt.data.length; //频率
@@ -126,6 +126,7 @@ function setChart(id, objDt) {
                 // pinchType: 'x', //禁用手势操作
                 // zoomType: "x",
                 panKey: 'shift',
+                showAxes: true, //当一个空图动态的添加数据集时是否要显示轴，默认为false，不显示
                 // 一些事件 比如addSeries, click, load,redraw, selection
                 //                events: {
                 //                    load: function() {
@@ -172,7 +173,9 @@ function setChart(id, objDt) {
                 enabled: false
             },
             title: {
-                text: ' '
+                text: null
+                // useHTML:true,
+    			// text:"Highcharts中文网 | <a href='http://www.hcharts.cn' target='_blank'>中文教程</a>" 
             },
             yAxis: {
                 min: minValue,
@@ -194,10 +197,11 @@ function setChart(id, objDt) {
                     // valueDecimals: 2
             },
             xAxis: {
+
                 type: 'datetime',
                 //          minRange : 3000, // 最小放大比例 1S
                 //                min: startdt,
-                tickPixelInterval: 100, // 网格间隔宽度默认100
+                tickPixelInterval: 500, // 网格间隔宽度默认100
                 tickLength: 0, // 刻度线的长度
                 tickInterval: 200, // 每大格0.2S
                 gridLineWidth: 1, // 网格线的宽度
@@ -222,9 +226,23 @@ function setChart(id, objDt) {
                 pointStart: startdt + Hz + 300, // 第一个点的时间
                 pointInterval: Hz, // 频率
                 pointIntervalUnit: 'milliseconds',
+                dashStyle: 'solid',
                 data: objDt.data,
+                zoneAxis: 'x',
                 lineWidth: 1,
-                zones: [{
+
+                zones: [
+                {
+					value: 1429157533000,
+					color: '#000',
+                    dashStyle: 'solid'
+				},
+				{
+					value: 1429157534000,
+					color: '#f7a35c',
+                    dashStyle: 'Dot'
+				},
+				{
                     color: '#000000', //设置折线的颜色
                 }],
                 enabled: true
@@ -271,6 +289,7 @@ function setChart(id, objDt) {
                 // trackBorderRadius: 7
             }
         });
+ 	console.log(chartbox.highcharts());
         //        chartbox.highcharts().hideLoading();
         // var dtBox = $(".highcharts-range-selector");
         // dtBox.attr("readonly", "readonly");
@@ -541,6 +560,7 @@ function setChart(id, objDt) {
             },
         });
         var chart = chartbox.highcharts();
+
         chart.setTitle({
             text: startTime + " 至 " + endTime
         });
