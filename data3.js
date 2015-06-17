@@ -110,7 +110,10 @@ function setChart(id, objDt) {
             //                showDuration: 1000
             //            },
             chart: {
+            	// plotBorderWidth: 1,
+            	// plotBorderColor: 'red',
                 //          reflow: false,//图会根据当窗口或者框架改变大小时而改变
+                selectionMarkerFill: 'red', //当选中某一区域时图会被放大，此时选中区域会有背景颜色
                 height: objDt.height,
                 width: objDt.width,
                 // animation: true,//是否开启动画
@@ -119,9 +122,9 @@ function setChart(id, objDt) {
                 // borderColor: '#ddd', //图表外边框的颜色
                 // borderRadius: 30, //图表外边框圆角
                 //          borderWidth : '1', // 图表外边框的宽度
-                panning: true, //禁用放大
-                pinchType: 'xy', //禁用手势操作
-                zoomType: "xy",
+                panning: false, //禁用放大
+                // pinchType: 'x', //禁用手势操作
+                // zoomType: "x",
                 panKey: 'shift',
                 // 一些事件 比如addSeries, click, load,redraw, selection
                 //                events: {
@@ -135,15 +138,15 @@ function setChart(id, objDt) {
             rangeSelector: {
                 inputEnabled: true,
                 buttons: [
-                    //           {
-                    //           type : 'second',
-                    //           count : 3,
-                    //           text : '3秒'
-                    //           }
-                    //          , {
-                    //              type : 'all',
-                    //              text : '全部'
-                    //          } 
+                  {
+                  type : 'second',
+                  count : 3,
+                  text : '3秒'
+                  }
+                 , {
+                     type : 'all',
+                     text : '全部'
+                 } 
                 ],
                 buttonTheme: {
                     width: 50
@@ -163,8 +166,7 @@ function setChart(id, objDt) {
             },
             // 图表缩放导航
             navigator: {
-                enabled: true,
-                margin: 10
+                enabled: false,
             },
             exporting: {
                 enabled: false
@@ -254,24 +256,24 @@ function setChart(id, objDt) {
                 // }
             },
             scrollbar: {
-                enabled: true
-                    //     barBackgroundColor: 'gray',
-                    //     barBorderRadius: 7,
-                    //     barBorderWidth: 0,
-                    //     buttonBackgroundColor: 'gray',
-                    //     buttonBorderWidth: 0,
-                    //     buttonArrowColor: 'yellow',
-                    //     buttonBorderRadius: 7,
-                    //     rifleColor: 'yellow',
-                    //     trackBackgroundColor: 'white',
-                    //     trackBorderWidth: 1,
-                    //     trackBorderColor: 'silver',
-                    //     trackBorderRadius: 7
+                enabled: true,
+                // barBackgroundColor: 'gray',
+                // barBorderRadius: 7,
+                // barBorderWidth: 0,
+                // buttonBackgroundColor: 'gray',
+                // buttonBorderWidth: 0,
+                // buttonArrowColor: 'yellow',
+                // buttonBorderRadius: 7,
+                // rifleColor: 'yellow',
+                // trackBackgroundColor: 'white',
+                // trackBorderWidth: 1,
+                // trackBorderColor: 'silver',
+                // trackBorderRadius: 7
             }
         });
         //        chartbox.highcharts().hideLoading();
-        var dtBox = $(".highcharts-range-selector");
-        dtBox.attr("readonly", "readonly");
+        // var dtBox = $(".highcharts-range-selector");
+        // dtBox.attr("readonly", "readonly");
     }
 
     //瞬时心率图 instantChart hr_ecg
