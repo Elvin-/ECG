@@ -1,0 +1,4 @@
+E:\hpf\HighchartAlertDialog\HighchartAlertDialog\bin\HighchartAlertDialog.dll
+E:\hpf\HighchartAlertDialog\HighchartAlertDialog\bin\HighchartAlertDialog.pdb
+E:\hpf\HighchartAlertDialog\HighchartAlertDialog\obj\Debug\HighchartAlertDialog.dll
+E:\hpf\HighchartAlertDialog\HighchartAlertDialog\obj\Debug\HighchartAlertDialog.pdb

@@ -20,13 +20,102 @@ Highcharts.setOptions({
     }
 });
 
+var G_selectPbId = null;
+function showDetails(t) {
+    $.dialog({
+        id: "BigImg",
+        esc: true,
+        content: '<div style="height:' + $(window).height() * 0.70 + 'px;"><div id="div_big_img"></div></div>',
+        width: $(window).width() * 0.62,
+        height: $(window).height() * 0.70,
+        title: '数据明细',
+        init: function() {
+
+            $('#div_big_img').highcharts({
+                chart: {
+                    type: 'column',
+                    width: 600,
+                    height: 400,
+                    margin: [50, 50, 100, 80]
+                },
+                title: {
+                    text: '文章时间走势'
+                },
+                xAxis: {
+                    categories: [
+                        '12:00',
+                        '13:00',
+                        '14:00',
+                        '15:00',
+                        '16:00',
+                        '17:00',
+                        '18:00',
+                        '19:00',
+                        '20:00',
+                        '21:00'
+                    ],
+                    labels: {
+                        rotation: -45,
+                        align: 'right',
+                        style: {
+                            fontSize: '13px',
+                            fontFamily: 'Verdana, sans-serif'
+                        }
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: "Population in 2008: <b>{point.y:.1f} millions</b>",
+                },
+                series: [{
+                    name: 'Population',
+                    data: [34.4, 11.8, 20.1, 20, 19.6, 9.5, 19.1, 18.4, 8, 17.3],
+                    dataLabels: {
+                        enabled: true,
+                        rotation: -90,
+                        color: '#FFFFFF',
+                        align: 'right',
+                        x: 4,
+                        y: 10,
+                        style: {
+                            fontSize: '13px',
+                            fontFamily: 'Verdana, sans-serif',
+                            textShadow: '0 0 3px black'
+                        }
+                    }
+                }]
+            });
+
+        },
+        max: false,
+        min: false,
+        fixed: true,
+        lock: true
+    });
+}
+
+function fullScr() {
+	$('.chart-container').toggleClass('modal');
+  $('.chart').highcharts().reflow();
+}
+
+function RemoveExc() {
+	if(G_selectPbId) {
+		$('#ecgChart').highcharts().xAxis[0].removePlotBand(G_selectPbId);
+		G_selectPbId = null;
+		console.log(G_selectPbId);
+	}
+}
+
 function setChart(id, objDt) {
     //设置网页大小
     var startData = startLine();
     console.log(startData);
     var chartbox = $("#" + id);
-    chartbox.css("width", objDt.width);
-    chartbox.css("height", objDt.height);
+    // chartbox.css("width", objDt.width);
+    // chartbox.css("height", objDt.height);
 
     //    Array.prototype.max = function() { // 最大值
     //        return Math.max.apply({}, this)
@@ -36,15 +125,16 @@ function setChart(id, objDt) {
     //    };
     //    var rmax = objDt.data.max();
     //    var rmin = objDt.data.min();
-
     var Hz = 1000 / objDt.fs; // objDt.fs
     var startdt = objDt.measureTime;
-    var startTime = "";	
+    var startTime = "";
     var endTime = "";
     var pageDt = 6 * (objDt.page - 1) * 1000;
     var maxValue = 2000;
     var minValue = -2000;
-
+    var $report = $('#report');
+    var chartWidth = objDt.width,
+        chartHeight = objDt.height;
     startdt += pageDt;
     console.log(startdt);
     switch (objDt.type) {
@@ -104,28 +194,28 @@ function setChart(id, objDt) {
     //心电 ecgChart
     if (chartbox.length > 0 && id == "ecgChart") {
         // 创建highcharts
-        window.chart = new Highcharts.StockChart({
+        var chart = new Highcharts.StockChart({
             //            loading: {
             //                hideDuration: 1000,
             //                showDuration: 1000
             //            },
             chart: {
-            	// plotBorderWidth: 1,
-            	// plotBorderColor: 'red',
+                // plotBorderWidth: 1,
+                // plotBorderColor: 'red',
                 //          reflow: false,//图会根据当窗口或者框架改变大小时而改变
                 selectionMarkerFill: 'red', //当选中某一区域时图会被放大，此时选中区域会有背景颜色
-                height: objDt.height,
-                width: objDt.width,
+                // height: objDt.height,
+                // width: objDt.width,
                 // animation: true,//是否开启动画
                 renderTo: id, // 对应的div id
                 // backgroundColor: '#EEEEEE', //设置背景颜色 （可以设置渐变）
                 // borderColor: '#ddd', //图表外边框的颜色
                 // borderRadius: 30, //图表外边框圆角
                 //          borderWidth : '1', // 图表外边框的宽度
-                panning: false, //禁用放大
-                // pinchType: 'x', //禁用手势操作
-                // zoomType: "x",
-                panKey: 'shift',
+                // panning: false, //禁用放大
+                // pinchType: '', //禁用手势操作
+                // zoomType: "",
+                // panKey: 'shift',
                 showAxes: true, //当一个空图动态的添加数据集时是否要显示轴，默认为false，不显示
                 // 一些事件 比如addSeries, click, load,redraw, selection
                 //                events: {
@@ -138,17 +228,18 @@ function setChart(id, objDt) {
             // 选中缩放的地方
             rangeSelector: {
                 inputEnabled: true,
-                buttons: [
-                  {
-                  type : 'second',
-                  count : 3,
-                  text : '3秒'
-                  }
-                 , {
-                     type : 'all',
-                     text : '全部'
-                 } 
-                ],
+                buttons: [{
+                    type: 'second',
+                    count: 1,
+                    text: '2秒'
+                }, {
+                    type: 'second',
+                    count: 3,
+                    text: '3秒'
+                }, {
+                    type: 'all',
+                    text: '全部'
+                }],
                 buttonTheme: {
                     width: 50
                 },
@@ -174,10 +265,11 @@ function setChart(id, objDt) {
             },
             title: {
                 text: null
-                // useHTML:true,
-    			// text:"Highcharts中文网 | <a href='http://www.hcharts.cn' target='_blank'>中文教程</a>" 
+                    // useHTML:true,
+                    // text:"Highcharts中文网 | <a href='http://www.hcharts.cn' target='_blank'>中文教程</a>" 
             },
             yAxis: {
+                id: 'a1',
                 min: minValue,
                 max: maxValue,
                 tickInterval: cellHeight * 5, // 每大格0.5 毫伏 500
@@ -199,24 +291,69 @@ function setChart(id, objDt) {
             xAxis: {
 
                 type: 'datetime',
-                //          minRange : 3000, // 最小放大比例 1S
+                // minRange : 5000, // 最小放大比例 1S
                 //                min: startdt,
                 tickPixelInterval: 500, // 网格间隔宽度默认100
                 tickLength: 0, // 刻度线的长度
-                tickInterval: 200, // 每大格0.2S
+                minTickInterval: 1000,
+                tickInterval: 200, // 每大格0.2S	
                 gridLineWidth: 1, // 网格线的宽度
                 gridLineColor: '#ff6a6a', //网格线的颜色 #ed7b10
                 minorGridLineColor: '#eda8b7', //次级网格线的颜色 b0a091
                 minorGridLineWidth: 0.5, //次级网格线的宽度
+                minorGridLineDashStyle: "Dot", //次级网格线是点线
                 minorTickInterval: 40, //次级网格的间距 0.04S
+                //设置区域带 表示删除 或异常
+                plotBands: [{
+                    borderColor: 'red',
+                    borderWidth: 1,
+                    color: '#FCFFC5',
+                    from: 1429157535000,
+                    to: 1429157536000,
+                    id: 'p1',
+                    //zIndex: 3,
+                    label: {
+                        useHTML: true,
+                        textAlign: 'center',
+                        text: Highcharts.dateFormat('%H:%M:%S:%L', 1429157535000) + '---' + Highcharts.dateFormat('%H:%M:%S:%L', 1429157536000) + '</br>时长：' + Highcharts.dateFormat('%M:%S', 1429157536000 - 1429157535000) + '</br>异常',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        style: {
+                            color: 'red',
+                            fontSize: 10,
+                        }
+                    },
+                    events: {
+                        click: function(e) {
+                        		G_selectPbId = 'p1';
+                            $report.html(Highcharts.dateFormat('%H:%M:%S:%L', this.options.from) + '--' + Highcharts.dateFormat('%H:%M:%S:%L', this.options.to) + '时长：' + Highcharts.dateFormat('%M:%S', this.options.to - this.options.from));
+                            console.log(this);
+                        },
+                        dblclick: function() {
+                            //showDetails(this.category);
+                            $('#report').html('您双击了 plotline');
+                        },
+                        contextmenu: function() {
+                                $('#report').html('您在plotband上触发了右键');
+                            }
+                            // mouseover: function (e) {
+                            //     $report.html(e.type);
+                            // },
+                            // mouseout: function (e) {
+                            //     $report.html(e.type);
+                            // }
+                    }
+                }],
                 labels: {
-                    enabled: false
-                        //是否显示x轴
+                    enabled: true, //是否显示x轴
+                    step: 5,
+                    align: 'left',
+                    format: '{value:%H:%M:%S}'
+
                 }
 
             },
-            series: [
-            {
+            series: [{
                 type: 'line',
                 states: {
                     hover: {
@@ -231,23 +368,19 @@ function setChart(id, objDt) {
                 zoneAxis: 'x',
                 lineWidth: 1,
 
-                zones: [
-                {
-					value: 1429157533000,
-					color: '#000',
+                zones: [{
+                    value: 1429157533000,
+                    color: '#000',
                     dashStyle: 'solid'
-				},
-				{
-					value: 1429157534000,
-					color: '#f7a35c',
+                }, {
+                    value: 1429157534000,
+                    color: '#f7a35c',
                     dashStyle: 'Dot'
-				},
-				{
+                }, {
                     color: '#000000', //设置折线的颜色
                 }],
                 enabled: true
-            },
-            {
+            }, {
                 type: 'line',
                 states: {
                     hover: {
@@ -263,8 +396,7 @@ function setChart(id, objDt) {
                     color: '#000000', //设置折线的颜色
                 }],
                 enabled: true
-            }
-            ],
+            }],
             credits: {
                 enabled: false,
                 // text: 'hk-bithealth.com',
@@ -275,21 +407,48 @@ function setChart(id, objDt) {
             },
             scrollbar: {
                 enabled: true,
-                // barBackgroundColor: 'gray',
-                // barBorderRadius: 7,
-                // barBorderWidth: 0,
-                // buttonBackgroundColor: 'gray',
-                // buttonBorderWidth: 0,
-                // buttonArrowColor: 'yellow',
-                // buttonBorderRadius: 7,
-                // rifleColor: 'yellow',
-                // trackBackgroundColor: 'white',
-                // trackBorderWidth: 1,
-                // trackBorderColor: 'silver',
-                // trackBorderRadius: 7
+                barBackgroundColor: 'gray',
+                barBorderRadius: 7,
+                barBorderWidth: 0,
+                buttonBackgroundColor: 'gray',
+                buttonBorderWidth: 0,
+                buttonArrowColor: 'yellow',
+                buttonBorderRadius: 7,
+                rifleColor: 'yellow',
+                trackBackgroundColor: 'white',
+                trackBorderWidth: 1,
+                trackBorderColor: 'silver',
+                trackBorderRadius: 7
             }
+        }, function() {
+            var plotband = this.get('a1');
+            console.log(plotband);
         });
- 	console.log(chartbox.highcharts());
+        $('<button>+</button>').insertBefore(chartbox).click(function() {
+            chartWidth *= 1.1;
+            chartHeight *= 1.1;
+            chart.setSize(chartWidth, chartHeight);
+        });
+        $('<button>-</button>').insertBefore(chartbox).click(function() {
+            chartWidth *= 0.9;
+            chartHeight *= 0.9;
+            chart.setSize(chartWidth, chartHeight);
+        });
+        $('<button>1:1</button>').insertBefore(chartbox).click(function() {
+            chartWidth = objDt.width;
+            chartHeight = objDt.height;
+            chart.setSize(objDt.width, objDt.height);
+        });
+        chartbox.bind('dblclick', fullScr);
+        $(document).keyup(function(event){
+
+         switch(event.keyCode) {
+         case 27:
+         fullScr();
+         break;
+         }
+        });
+
         //        chartbox.highcharts().hideLoading();
         // var dtBox = $(".highcharts-range-selector");
         // dtBox.attr("readonly", "readonly");
@@ -542,7 +701,7 @@ function setChart(id, objDt) {
             exporting: {
                 enabled: false
             },
-            series: [ {
+            series: [{
                 data: objDt.data,
                 pointStart: startdt,
                 pointInterval: 1,
@@ -550,8 +709,7 @@ function setChart(id, objDt) {
                 zones: [{
                     color: '#000' //设置折线的颜色
                 }],
-            }
-            ],
+            }],
             credits: {
                 enabled: false,
             },
@@ -567,15 +725,20 @@ function setChart(id, objDt) {
     }
 }
 
+
+
+
+
 function startLine() {
- return [134,134,134,134,134,134,134,134,134,134,
-            134,134,134,134,134,134,134,134,134,134,
-            800,800,800,800,800,800,800,800,800,
-            800,800,800,800,800,800,800,800,800,
-            800,800,800,800,800,800,800,800,800,
-            800,800,800,800,800,800,800,800,800,
-            134,134,134,134,134,134,134,134,134,134,
-            134,134,134,134,134,134,134,134,134,134];
+    return [134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
+        134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
+        800, 800, 800, 800, 800, 800, 800, 800, 800,
+        800, 800, 800, 800, 800, 800, 800, 800, 800,
+        800, 800, 800, 800, 800, 800, 800, 800, 800,
+        800, 800, 800, 800, 800, 800, 800, 800, 800,
+        134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
+        134, 134, 134, 134, 134, 134, 134, 134, 134, 134, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+    ];
 }
 
 function getObj() {

@@ -10,12 +10,33 @@
 			text-align: center;
 			background-color: #ccc;
 			padding-top: 50px;
+			margin: 0 auto;
 		}
+		.chart {
+    min-width: 300px;
+    max-width: 800px;
+    height: 300px;
+    margin: 1em auto;
+}
+		.modal {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+.modal .chart {
+    height: 90%;
+    width: 90%;
+    max-width: none;
+}
 
 		</style>
-		<script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
-		<script src="http://code.highcharts.com/stock/highstock.js"></script>
-		<script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
+		<script type="text/javascript" src="./js/jquery.min.js"></script>
+		<script src="./js/highstock.js"></script>
+		<script src="./js/exporting.js"></script>
+		<!--<script src="./js/lhgdialog.min.js"></script> -->
 		<script src="./data3.js"></script>
 		<script>
 		$(function() {
@@ -31,10 +52,14 @@
 		</script>
 	</head>
 	<body>
-	<div class="main-body">
-		<div id="ecgChart" style="height: 700px; width: 1000px; margin: 0 auto;"></div>
-		<!-- <div id="report"></div>
-		<button id="btn_deleteDT" class="deleteDT" onclick="deleteDT();" >删除数据</button> -->
+	<div class="main-body chart-container">
+		<!-- <div id="ecgChart" style="height: 700px; width: 1000px; margin: 0 auto;"></div> -->
+		<div id="report"></div>
+		<div id="BigImg"></div>
+		<input type="button" value="全屏" onclick="fullScr();">
+		<button id="btn_deleteDT"  onclick="RemoveExc();" >删除数据</button>
+    	<div id="ecgChart" class="chart"></div>
+
 	</div>
 	</body>
 	</html>
