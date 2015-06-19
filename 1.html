@@ -1,0 +1,684 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Highcharts First Example</title>
+    <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/ui-lightness/jquery-ui.css" rel="Stylesheet" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
+    <script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
+    <style>
+        #detail-container { height: 260px }
+        #top-container { height: 110px }
+        body { font-size: 80%; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        fieldset { padding:0; border:0; margin-top:10px; }
+    </style>
+    <link href='http://fonts.googleapis.com/css?family=Average' rel='stylesheet' type='text/css'>
+        <script type="text/javascript">
+           $(document).ready(function() {
+
+               var today = new Date();
+
+               var getPriceByTime = function(time, offset) {
+                   for (var i = timeIdx; i < $.myApp.topChart.series[0].points.length; i++) {
+                       if ($.myApp.topChart.series[0].points[i].x == time) {
+                           return $.myApp.topChart.series[0].points[i].y;
+                       }
+                   }
+               };
+
+               // m/d/y --> utc
+               var strToUTC = function(dt) {
+                   var d = dt.split('/', 3);
+                   d[0] = parseInt(d[0], 10) - 1;
+                   d[1] = parseInt(d[1], 10);
+                   d[2] = parseInt(d[2], 10);
+                   if (d[2] < 2000) {
+                       d[2] += 2000;
+                   }
+                   return Date.UTC(d[2], d[0], d[1]);
+               };
+
+               // Reset the dialog back to original state
+               var resetDialog = function() {
+                   var buttons = $('#dialog').dialog("option", "buttons");
+                   // Remove the 'Remove Order' button if exists
+                   if (buttons.length == 3) {
+                       buttons.splice(2, 1);
+                       $('#dialog').dialog("option", "buttons", buttons);
+                   }
+                   $('#dialog').dialog("option", "title", "Create Stop Order");
+                   $('#dialog').dialog("option", "stopOrderId", null);
+               };
+
+               $.myApp = { 
+                   numOfYears: 2,
+                   boughtColor: '#0099FF', soldColor: '#FF9900',
+                   stopOrders: {},
+                   nextOrderId: 1
+               };
+
+               // Initiate stop order dialog
+               $( "#dialog" ).dialog({
+                    autoOpen: false,
+                    height: 270,
+                    width: 320,
+                    modal: true,
+                    close: function() { resetDialog(); },
+                    title: 'Create Stop Order',
+                    buttons: [{
+                         text: "Save Order",
+                         click: function() {
+                             var id = $(this).dialog("option", "stopOrderId");
+                             id = id || $.myApp.nextOrderId++;
+                             var order = $.myApp.stopOrders[id] || { };
+                             order.shares = $('#shares').val();
+                             order.stopOrder = $('#stopOrder').val();
+                             order.price = $('#price').val();
+                             order.expire = strToUTC($('#expire').val());
+                             $.myApp.stopOrders[id] = order; 
+
+                             // Setup events for both plotlines
+                             var events = {
+                                 mouseover: function() {
+                                    $.each(this.axis.plotLinesAndBands, function(idx, plot) {
+                                        if (plot.id == id) {
+                                            plot.svgElem.element.style.cursor = 'pointer';
+                                            return false;
+                                        }
+                                    });
+                                 },
+                                 // Click on the prompt line
+                                 click: function(evt) {
+                                    $('#dialog').dialog("option", "stopOrderId", id);
+                                    var stopOrder = $.myApp.stopOrders[id];
+                                    $('#dialog').dialog("option", "title", "Modify Stop Order");
+                                    $('#price').val(Highcharts.numberFormat(stopOrder.price, 2));
+                                    $('#stopOrder').val(stopOrder.stopOrder);
+                                    $('#shares').val(stopOrder.shares);
+                                    $('#expire').val(Highcharts.dateFormat("%m/%d/%y", stopOrder.expire));
+
+                                    var buttons = $('#dialog').dialog("option", "buttons");
+                                    buttons.push({
+                                        text: 'Remove Order',
+                                        click: function() {
+                                           // Remove plot line and stop order settings
+                                           delete $.myApp.stopOrders[id];
+                                           $.myApp.detailChart.xAxis[0].removePlotLine(id);
+                                           $.myApp.detailChart.yAxis[0].removePlotLine(id);
+ 
+                                           // Set back to original state
+                                           resetDialog();                
+                                           $('#dialog').dialog("close");                
+                                        }
+                                    });
+                                    $('#dialog').dialog("option", "buttons", buttons);
+                                    $('#dialog').dialog("open");                
+                                 }
+                             };
+
+                             // Create the plot lines for the stop order
+                             $.myApp.detailChart.xAxis[0].removePlotLine(id);
+                             $.myApp.detailChart.yAxis[0].removePlotLine(id);
+
+                             $.myApp.detailChart.xAxis[0].addPlotLine({
+                                 value: order.expire,
+                                 width: 2,
+                                 events: events,
+                                 color: (order.stopOrder == 'buy') ? '#B3B7FF' : $.myApp.soldColor,
+                                 id: id,
+                                 // Over both line series and plot line
+                                 zIndex: 3
+                             });
+                             $.myApp.detailChart.yAxis[0].addPlotLine({
+                                 value: order.price,
+                                 width: 2,
+                                 color: (order.stopOrder == 'buy') ? '#B3B7FF' : $.myApp.soldColor,
+                                 id: id,                                 
+                                 zIndex: 3,
+                                 events: events,
+                                 label: {
+                                     text: ((order.stopOrder == 'buy') ? 'SO-B by (' : 'SO-S by (')  + Highcharts.dateFormat("%e %b %Y", parseInt(order.expire)) + ') @ ' + order.price,
+                                     align: 'right'
+                                 } 
+                             });
+
+                             resetDialog();
+                             $('#dialog').dialog("close");
+                         }
+                    }, {
+                         text: "Cancel",
+                         click: function() {
+                             resetDialog();
+                             $('#dialog').dialog("close");
+                         } 
+                    }]                           
+               });
+
+               // Update the portfolio detail
+               var updatePortfolio = function(time) {
+
+                   var tradeTime = null;
+                   var marketPrice = -1;
+
+                   // Find the investment time just before the selected time
+                   $.each($.myApp.investDateArr, function(idx, investTime) {
+                        if (investTime > time) {
+                            tradeTime = $.myApp.investDateArr[idx - 1];
+                            return false;
+                        } else if (investTime == time) {
+                            tradeTime = investTime;
+                            return false;
+                        }
+                   });       
+                
+                   // If still not found, then check for whether the selected 
+                   // time is the latest
+                   if (!tradeTime && time > $.myApp.investDateArr[$.myApp.investDateArr.length-1]) {
+                       tradeTime = $.myApp.investDateArr[$.myApp.investDateArr.length - 1];
+                       marketPrice = $.myApp.topChart.series[0].points[$.myApp.topChart.series[0].points.length - 1].y;
+                   }
+
+                   if (tradeTime) {
+                       var investment = $.myApp.investment[tradeTime];
+
+                       $('#selectedTime').text('As of ' + Highcharts.dateFormat('%a %e %b %Y', time));
+                       // Describe the trade
+                       $('#tradeDesc').text('');
+                       if (time == tradeTime) {
+                           var desc = (investment.bought) ? ": Bought " : ": Sold ";
+                           desc += investment.shares + " shares @ " + " £" + Highcharts.numberFormat(investment.price / 100);
+                           $('#tradeDesc').text(desc);
+                       }
+
+                       $('#shareOwned').text(investment.totalShares);
+                       $('#cost').text('£' + Highcharts.numberFormat((investment.profitSoFar / 100)));
+                       // Converted from selected time to market value
+                       if (marketPrice == -1) {
+                           marketPrice = investment.price;
+                       }
+
+                       $('#marketValue').text('£' + Highcharts.numberFormat(investment.totalShares * marketPrice / 100));
+
+                       // Calc the target to be profitable
+                       $('#targetPrice').text('£' + Highcharts.numberFormat((-investment.profitSoFar) / investment.totalShares / 100));
+                   }
+               };
+
+               // Load the 5 years of stock in the top level
+               var loadPortfolio = function(symbol) { 
+                   $.getJSON('./histStock.php?symbol=' + symbol.toLowerCase() + '&years=' + $.myApp.numOfYears,
+                        function(stockData) {
+                          
+                          $.myApp.topChart.hideLoading();
+                          // Build up the series data array
+                          var seriesData = [];
+                          var openData = [];
+                          var yearStr = '';
+                          $.each(stockData.rows, function(idx, data) {
+                              // Get the year
+                              var time = data.date * 1000;
+                              seriesData.push([ time, data.price ]);
+                              openData.push([ time, data.open ]);
+                          });
+
+                          $.myApp.topChart.series[0].setData(seriesData);
+                          $.myApp.topChart.series[1].setData(openData);
+
+                          // Construct the trading points series
+                          var boughtData = [];
+                          $.myApp.tmpCashCounter = 0;
+                          $.myApp.tmpSharesCounter = 0;
+                          $.myApp.investment = {};
+                          $.myApp.investDateArr = [];
+                          $.myApp.bought = { };
+                          $.each(stockData.bought, function(idx, bought) {
+                              // Calculate how much I have invested
+                              $.myApp.tmpCashCounter += (bought.shares * bought.price);
+                              $.myApp.tmpSharesCounter += bought.shares;
+                              $.myApp.investDateArr.push(bought.date * 1000);
+                              $.myApp.investment[bought.date * 1000] = {
+                                   shares: bought.shares,
+                                   bought: true,
+                                   totalShares: $.myApp.tmpSharesCounter,
+                                   price: bought.price,
+                                   profitSoFar: $.myApp.tmpCashCounter * -1
+                              }; 
+                              boughtData.push({
+                                 x: bought.date * 1000,
+                                 y: bought.price,
+                                 marker: {
+                                    symbol: 'circle'
+                                 }
+                              }); 
+                          });
+                          $.myApp.topChart.series[2].setData(boughtData);
+                          
+                          var soldData = [];
+                          $.myApp.sold = { };
+                          $.each(stockData.sold, function(idx, sold) {
+                              // Calculate how much I have sold
+                              $.myApp.tmpCashCounter -= (sold.shares * sold.price);
+                              $.myApp.tmpSharesCounter -= sold.shares;
+                              $.myApp.investDateArr.push(sold.date * 1000);
+                              $.myApp.investment[sold.date * 1000] = {
+                                   shares: sold.shares,
+                                   bought: false,
+                                   totalShares: $.myApp.tmpSharesCounter ,
+                                   price: sold.price,
+                                   profitSoFar: $.myApp.tmpCashCounter * -1
+                              }; 
+                              soldData.push({
+                                 x: sold.date * 1000,
+                                 y: sold.price,
+                                 marker: {
+                                    symbol: 'triangle'
+                                 }
+                              }); 
+                          });
+                          $.myApp.topChart.series[3].setData(soldData);
+
+                          // Register the stock price name
+                          $.myApp.stockName = stockData.name;
+                          $.myApp.stockSymbol = symbol;
+
+                          // Indexing the traded dates from the topChart
+                          $.myApp.investDateArr.sort();
+                          var i = 0;
+                          $.each($.myApp.investDateArr, function(idx, tradeDate) {
+                              for (; i < $.myApp.topChart.series[0].points.length; i++) {
+                                  if ($.myApp.topChart.series[0].points[i].x == tradeDate) {
+                                      $.myApp.investment[tradeDate].index = i;
+                                  }
+                              } 
+                          });
+
+                          $.myApp.topChart.xAxis[0].setTitle({
+                               text: $.myApp.numOfYears + ' years',
+                               align: 'high'
+                          });
+
+                          // Show my current trades 
+                          updatePortfolio(new Date().getTime());
+                        }
+                   );
+               };
+
+               $.myApp.getExtreme = function(timeRange) {
+                   var high = 0, low = timeRange.y;
+                   var highTime = 0, lowTime = 0;
+                   $.each($.myApp.topChart.series[0].data, function(idx, data) {
+                        if (data.x >= timeRange.start && data.x <= timeRange.x) {
+                            if (data.y > high) {
+                                high = data.y;
+                                highTime = data.x;
+                            } else if (data.y < low) {
+                                low = data.y;
+                                lowTime = data.x;
+                            }
+                        }
+                        if (data.x > timeRange.x) {
+                           return false;
+                        }
+                   });
+                   return { high: high, highTime: highTime, 
+                            low: low, lowTime: lowTime };
+               };
+
+               $.myApp.detailChart = new Highcharts.Chart({
+                   chart: {
+                       showAxes: true,
+                       renderTo: 'detail-container',
+                       events: {
+                           click: function(evt) {
+
+                               // Only allow to prompt stop order dialog
+                               // if the chart contains future time
+                               if (!$.myApp.detailChart.futureDate) {
+                                  return;
+                               }
+
+                               // Based on what we click on the time, set
+                               $('#expire').val(Highcharts.dateFormat("%m/%d/%y", evt.xAxis[0].value));
+                               $('#price').val(Highcharts.numberFormat(evt.yAxis[0].value, 2));
+ 
+                               // Display the form to setup stop order
+                               $('#dialog').dialog("open");                
+                           }
+                       },
+                   },
+                   title: {
+                       margin: 10,
+                       text: null
+                   },
+                   credits: {
+                       enabled: false
+                   },
+                   legend: {
+                       enabled: true,
+                       floating: true,
+                       verticalAlign: 'top',
+                       align: 'right'
+                   },
+                   series: [{
+                       marker: {
+                          enabled: false,
+                          states: {
+                              hover: {
+                                  enabled: true
+                              }
+                          }
+                       },
+                       cursor: 'crosshair',
+                       point: {
+                          events: {
+                              mouseOver: function() {
+                                  $.myApp.topChart.series[4].setData([]);
+                                  $.myApp.topChart.series[4].addPoint([this.x, this.y]);
+                              },
+                              mouseOut: function() {
+                                  $.myApp.topChart.series[4].setData([]);
+                              }
+                          }
+                       },
+                       stickyTracking: false,
+                       // This is the default series, cannot be controlled
+                       showInLegend: false
+                   }, {
+                       name: 'Open Price',
+                       marker: {
+                          enabled: false
+                       },
+                       visible: false
+                   }],
+                   // Fixed location tooltip in the top left
+                   tooltip: {
+                       shared: true,
+                       positioner: function() {
+                           return { x: 10, y: 10 }
+                       },
+                       // Include 52 week high and low
+                       formatter: function() {
+                           var series = $.myApp.topChart.series[0];
+                           var start = series.data[0].x;
+                           var high = 0, low = this.y;
+                           var cmpStart = this.x - (52 * 7 * 24 * 3600000);
+                           var suffix = '';
+                           if (cmpStart >= start) {
+                               // Search for the high and low between
+                               // the time range
+                               var extreme = $.myApp.getExtreme({
+                                      start: cmpStart, x: this.points[0].x, y: this.points[0].y
+                               });
+
+                               suffix = '<br/>' + '52 weeks high: <b>' + extreme.high + '</b>' +
+                                        ' ( ' + Highcharts.dateFormat('%e %b', extreme.highTime) + ' )<br/>' +
+                                       '52 weeks low: <b>' + extreme.low + '</b>'+ 
+                                       ' ( ' + Highcharts.dateFormat('%e %b', extreme.lowTime) + ' )';
+                           }
+                           
+                           // If the open price series is hidden, then we need to access
+                           // the series from the backdoor
+                           var openPrice = 0;
+                           if (this.points[1]) {
+                               openPrice = this.points[1].y;
+                           } else {
+                               var tm = this.points[0].x;
+                               var openSeries = $.myApp.topChart.series[1];
+                               for (var i = 0; i < openSeries.xData.length; i++) {
+                                   if (openSeries.xData[i] == tm) {
+                                       openPrice = openSeries.yData[i];
+                                       break;
+                                   }
+                               }
+                           }
+
+                           return Highcharts.dateFormat('%a %e %b %y', this.points[0].x) + '<br/>' +
+                                  'Open price:    <b>' + openPrice + '</b><br/>' + 
+                                  'Closing price: <b>' + this.points[0].y + '</b>' + suffix;
+                       }
+                   },
+                   yAxis: {
+                      title: {
+                         text: 'Price'
+                      }
+                   },
+                   xAxis: {
+                      type: 'datetime'
+                   }
+               });
+ 
+               $.myApp.topChart = new Highcharts.Chart({
+                   chart: {
+                      zoomType: 'x',
+                      spacingRight: 15,
+                      renderTo: 'top-container',
+                      events: {
+                         load: function() {
+                             // Load the default stock symbol of the portfolio
+                             var symbol = $('#symbol').val();
+                             $('#symbol').attr('disabled', true);
+                             loadPortfolio(symbol);
+                         },
+                         // The top level time series have
+                         // been redrawn, enable the portfolio
+                         // select box
+                         redraw: function() {
+                             $('#symbol').attr('disabled', false);  
+                         },
+                         // Selection - get all the data points from the
+                         // selection and popluate into the detail chart
+                         selection: function(evt) {
+                             // Get the xAxis selection
+                             var selectStart = Math.round(evt.xAxis[0].min);
+                             var selectEnd   = Math.round(evt.xAxis[0].max);
+
+                             // We use plotBand to paint the selected area
+                             // to emulation 
+                             this.xAxis[0].removePlotBand('selected');
+                             this.xAxis[0].addPlotBand({
+                                    color: 'rgba(69, 114, 167, 0.25)',
+                                    id: 'selected',
+                                    from: selectStart,
+                                    to: selectEnd
+                             });
+
+                             // Construct the series data from the selection
+                             var selectedData = [];
+                             var openData = [];
+                             
+                             // Record the zoom index for other operations
+                             $.myApp.zoomXStart = -1;
+                             $.myApp.zoomXEnd = -1;
+
+                             delete $.myApp.detailChart.futureDate;
+                             for (var i = 0; i < this.series[0].data.length; i++) {
+                                 var pt = this.series[0].data[i];
+
+                                 // Since we make it not visible, we need to use
+                                 // xData or processedXData to access the data
+                                 var opX = this.series[1].xData[i];
+                                 var opY = this.series[1].yData[i];
+                                 if (pt.x >= selectStart && pt.x <= selectEnd) {
+                                    if ($.myApp.zoomXStart == -1) {
+                                        $.myApp.zoomXStart = i;
+                                    }
+                                    selectedData.push([pt.x, pt.y]);
+                                    openData.push([opX, opY]);
+                                 }
+   
+                                 // If we are plotting any future date, then record the
+                                 // first future date
+                                 if (pt.y == null && !$.myApp.detailChart.futureDate) {
+                                     $.myApp.detailChart.futureDate = pt.x;
+                                 }
+
+                                 if (pt.x > selectEnd) {
+                                    $.myApp.zoomXEnd = i;
+                                    break;
+                                 }
+                             } 
+
+                             // Update the detail series
+                             $.myApp.detailChart.series[0].setData(selectedData, false);
+                             $.myApp.detailChart.series[1].setData(openData, false);
+
+                             // Update the detail's title
+                             $.myApp.detailChart.setTitle({
+                               text: $.myApp.stockName + " (" + $.myApp.stockSymbol + ")",
+                               style: { fontFamily: 'palatino, serif', fontWeight: 'bold' }
+                             }, {
+                               text: Highcharts.dateFormat('%e %b %y', selectStart) + ' -- ' +
+                                     Highcharts.dateFormat('%e %b %y', selectEnd),
+                               style: { fontFamily: 'palatino, serif' }
+                             });
+                               
+                             $.myApp.detailChart.redraw();                             
+                             return false;
+                         }
+                      }
+                   },
+                   title: {
+                      text: null
+                   },
+                   yAxis: {
+                      title: {
+                         text: null
+                      },
+                      gridLineWidth: 0,
+                      labels: {
+                         enabled: false
+                      }
+                   },
+                   tooltip: {
+                      enabled: false
+                   },
+                   xAxis: {
+                      title: {
+                         text: null
+                      },
+                      type: 'datetime'
+                   },
+                   series: [{
+                      type: 'areaspline',
+                      marker: {
+                          enabled: false
+                      },
+                      enableMouseTracking: false
+                   }, {
+                      // This is the open price series and never shown
+                      // in the bottom chart. We use it to copy this
+                      // to the top chart
+                      visible: false
+                   }, {
+                       // Trade series is a set of bought and sold data points
+                       type: 'scatter',
+                       allowPointSelect: true,
+                       color: $.myApp.boughtColor,
+                       dataLabels: {
+                           enabled: true,
+                           formatter: function() {
+                               return 'B';
+                           }
+                       },
+                       point: {
+                           events: {
+                               select: function() {
+                                   updatePortfolio(this.x);
+                               },
+                               unselect: function() {
+                                   // Only default back to current time portfolio detail
+                                   // when unselecting itself
+                                   var selectPt = $.myApp.topChart.getSelectedPoints();
+                                   if (selectPt[0].x == this.x) {
+                                       updatePortfolio(new Date().getTime());
+                                   }
+                               }
+                           }
+                       }
+                   }, {
+                       // Trade series is a set of bought and sold data points
+                       type: 'scatter',
+                       allowPointSelect: true,
+                       color: $.myApp.soldColor,
+                       dataLabels: {
+                           enabled: true,
+                           formatter: function() {
+                               return 'S';
+                           }
+                       },
+                       point: {
+                           events: {
+                               select: function() {
+                                   updatePortfolio(this.x);
+                               },
+                               unselect: function() {
+                                   // Only default back to current time portfolio detail
+                                   // when unselecting itself
+                                   var selectPt = $.myApp.topChart.getSelectedPoints();
+                                   if (selectPt[0].x == this.x) {
+                                       updatePortfolio(new Date().getTime());
+                                   }
+                               }
+                           }
+                       }
+                   }, {
+                       type: 'scatter',
+                       color: '#AA4643'
+                   }],
+                   legend: {
+                      enabled: false
+                   },
+                   credits: {
+                      enabled: false
+                   }
+               }); 
+
+               $.myApp.topChart.showLoading();
+
+      });
+        </script>
+    </head>
+    <body>
+  <div>
+    <div id="container">
+        <div id='detail-container'></div>
+        <div id='top-container'></div>
+        <div><form>My Portfolio: <select id='symbol'>
+            <option value='RR.L'>Rolls Royce</option>
+            <option value='NG.L' selected>National Grid</option>
+        </select>
+        </form>
+        </div>
+        <div id='portfolio-detail'>
+            <span id='selectedTime'></span>
+            <span id='tradeDesc'></span><br/>
+            Total shares owned: <span id='shareOwned'></span><br/>
+            Profit of investment: <span id='cost'></span><br/>
+            Market value of investment: <span id='marketValue'></span><br/>
+            Target Price for +ve return: <span id='targetPrice'></span>
+        </div>
+    </div>
+  </div>
+
+  <!-- form for editing stop orders -->
+  <div id='dialog'>
+    <form>
+    <fieldset>
+        <label for="expire">Expire at</label>
+        <input type=text name="expire" id="expire" size=9 ><br/><br/>
+    <select name='stopOrder' id='stopOrder'><option value='buy' selected>Buy</option><option value='sell'>Sell</option></select>
+        <label for="shares">no. of shares</label>
+        <input type="text" name="shares" id="shares" value="" size=7 class="text ui-widget-content ui-corner-all" />,
+        <label for="price">when market price reaches (in pences) </label>
+        <input type="text" name="price" id="price" value="" size=7 class="text ui-widget-content ui-corner-all" />
+    </fieldset>
+    </form>
+  </div>
+
+
+    </body>
+</html>
+

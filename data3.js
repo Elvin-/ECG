@@ -21,6 +21,7 @@ Highcharts.setOptions({
 });
 
 var G_selectPbId = null;
+
 function showDetails(t) {
     $.dialog({
         id: "BigImg",
@@ -97,16 +98,64 @@ function showDetails(t) {
 }
 
 function fullScr() {
-	$('.chart-container').toggleClass('modal');
-  $('.chart').highcharts().reflow();
+    $('.chart-container').toggleClass('modal');
+    $('.chart').highcharts().reflow();
+}
+
+function addEC() {
+
 }
 
 function RemoveExc() {
-	if(G_selectPbId) {
-		$('#ecgChart').highcharts().xAxis[0].removePlotBand(G_selectPbId);
-		G_selectPbId = null;
-		console.log(G_selectPbId);
-	}
+    if (G_selectPbId) {
+        $('#ecgChart').highcharts().xAxis[0].removePlotBand(G_selectPbId);
+        G_selectPbId = null;
+        console.log(G_selectPbId);
+    }
+}
+
+function addExc() {
+    var objPb = {
+        borderColor: 'red',
+        borderWidth: 1,
+        color: '#FCFFC5',
+        from: 1429157535000,
+        to: 1429157536000,
+        id: 'p1',
+        //zIndex: 3,
+        label: {
+            useHTML: true,
+            textAlign: 'center',
+            text: Highcharts.dateFormat('%H:%M:%S:%L', 1429157535000) + '-' + Highcharts.dateFormat('%H:%M:%S:%L', 1429157536000) + '</br>时长：' + Highcharts.dateFormat('%M:%S', 1429157536000 - 1429157535000) + '</br>异常',
+            align: 'center',
+            verticalAlign: 'middle',
+            style: {
+                color: 'red',
+                fontSize: 10,
+            }
+        },
+        events: {
+            click: function(e) {
+                G_selectPbId = 'p1';
+                $report.html(Highcharts.dateFormat('%H:%M:%S:%L', this.options.from) + '--' + Highcharts.dateFormat('%H:%M:%S:%L', this.options.to) + '时长：' + Highcharts.dateFormat('%M:%S', this.options.to - this.options.from));
+                console.log(this);
+            },
+            dblclick: function() {
+                //showDetails(this.category);
+                $('#report').html('您双击了 plotline');
+            },
+            contextmenu: function() {
+                    $('#report').html('您在plotband上触发了右键');
+                }
+                // mouseover: function (e) {
+                //     $report.html(e.type);
+                // },
+                // mouseout: function (e) {
+                //     $report.html(e.type);
+                // }
+        }
+    };
+    $('#ecgChart').highcharts().xAxis[0].addPlotBand(objPb);
 }
 
 function setChart(id, objDt) {
@@ -203,7 +252,7 @@ function setChart(id, objDt) {
                 // plotBorderWidth: 1,
                 // plotBorderColor: 'red',
                 //          reflow: false,//图会根据当窗口或者框架改变大小时而改变
-                selectionMarkerFill: 'red', //当选中某一区域时图会被放大，此时选中区域会有背景颜色
+                selectionMarkerFill: 'rgba(69,114,167,0.50)', //当选中某一区域时图会被放大，此时选中区域会有背景颜色
                 // height: objDt.height,
                 // width: objDt.width,
                 // animation: true,//是否开启动画
@@ -212,10 +261,10 @@ function setChart(id, objDt) {
                 // borderColor: '#ddd', //图表外边框的颜色
                 // borderRadius: 30, //图表外边框圆角
                 //          borderWidth : '1', // 图表外边框的宽度
-                // panning: false, //禁用放大
-                // pinchType: '', //禁用手势操作
-                // zoomType: "",
-                // panKey: 'shift',
+                panning: false, //禁用放大
+                // pinchType: 'x', //禁用手势操作
+                zoomType: 'x',
+                panKey: 'shift',
                 showAxes: true, //当一个空图动态的添加数据集时是否要显示轴，默认为false，不显示
                 // 一些事件 比如addSeries, click, load,redraw, selection
                 //                events: {
@@ -290,7 +339,7 @@ function setChart(id, objDt) {
             },
             xAxis: {
 
-                type: 'datetime',
+                //type: 'datetime',
                 // minRange : 5000, // 最小放大比例 1S
                 //                min: startdt,
                 tickPixelInterval: 500, // 网格间隔宽度默认100
@@ -304,55 +353,27 @@ function setChart(id, objDt) {
                 minorGridLineDashStyle: "Dot", //次级网格线是点线
                 minorTickInterval: 40, //次级网格的间距 0.04S
                 //设置区域带 表示删除 或异常
-                plotBands: [{
-                    borderColor: 'red',
-                    borderWidth: 1,
-                    color: '#FCFFC5',
-                    from: 1429157535000,
-                    to: 1429157536000,
-                    id: 'p1',
-                    //zIndex: 3,
-                    label: {
-                        useHTML: true,
-                        textAlign: 'center',
-                        text: Highcharts.dateFormat('%H:%M:%S:%L', 1429157535000) + '---' + Highcharts.dateFormat('%H:%M:%S:%L', 1429157536000) + '</br>时长：' + Highcharts.dateFormat('%M:%S', 1429157536000 - 1429157535000) + '</br>异常',
-                        align: 'center',
-                        verticalAlign: 'middle',
-                        style: {
-                            color: 'red',
-                            fontSize: 10,
-                        }
-                    },
-                    events: {
-                        click: function(e) {
-                        		G_selectPbId = 'p1';
-                            $report.html(Highcharts.dateFormat('%H:%M:%S:%L', this.options.from) + '--' + Highcharts.dateFormat('%H:%M:%S:%L', this.options.to) + '时长：' + Highcharts.dateFormat('%M:%S', this.options.to - this.options.from));
-                            console.log(this);
-                        },
-                        dblclick: function() {
-                            //showDetails(this.category);
-                            $('#report').html('您双击了 plotline');
-                        },
-                        contextmenu: function() {
-                                $('#report').html('您在plotband上触发了右键');
-                            }
-                            // mouseover: function (e) {
-                            //     $report.html(e.type);
-                            // },
-                            // mouseout: function (e) {
-                            //     $report.html(e.type);
-                            // }
-                    }
-                }],
+                plotBands: [],
                 labels: {
                     enabled: true, //是否显示x轴
                     step: 5,
                     align: 'left',
                     format: '{value:%H:%M:%S}'
 
-                }
+                },
+                events: {
+                    setExtremes: function(event) {
+                        console.log('event.min' + event.min);
+                    },
+                },
 
             },
+            plotOptions: {
+                series: {
+                    connectNulls: false
+                }
+            },
+
             series: [{
                 type: 'line',
                 states: {
@@ -360,7 +381,7 @@ function setChart(id, objDt) {
                         enabled: false
                     }
                 },
-                pointStart: startdt + Hz + 300, // 第一个点的时间
+                pointStart: startdt + Hz + 400, // 第一个点的时间
                 pointInterval: Hz, // 频率
                 pointIntervalUnit: 'milliseconds',
                 dashStyle: 'solid',
@@ -369,16 +390,18 @@ function setChart(id, objDt) {
                 lineWidth: 1,
 
                 zones: [{
-                    value: 1429157533000,
-                    color: '#000',
-                    dashStyle: 'solid'
-                }, {
-                    value: 1429157534000,
-                    color: '#f7a35c',
-                    dashStyle: 'Dot'
-                }, {
-                    color: '#000000', //设置折线的颜色
-                }],
+                        value: 1429157533000,
+                        color: '#000',
+                        dashStyle: 'solid'
+                    }, {
+                        value: 1429157534000,
+                        color: '#f7a35c',
+                        dashStyle: 'Dot'
+                    }, {
+                        color: '#000000', //设置折线的颜色
+                    }
+
+                ],
                 enabled: true
             }, {
                 type: 'line',
@@ -391,6 +414,7 @@ function setChart(id, objDt) {
                 pointInterval: Hz, // 频率
                 pointIntervalUnit: 'milliseconds',
                 data: startData,
+                step: true,
                 lineWidth: 1,
                 zones: [{
                     color: '#000000', //设置折线的颜色
@@ -440,13 +464,12 @@ function setChart(id, objDt) {
             chart.setSize(objDt.width, objDt.height);
         });
         chartbox.bind('dblclick', fullScr);
-        $(document).keyup(function(event){
-
-         switch(event.keyCode) {
-         case 27:
-         fullScr();
-         break;
-         }
+        $(document).keyup(function(event) {
+            switch (event.keyCode) {
+                case 27:
+                    fullScr();
+                    break;
+            }
         });
 
         //        chartbox.highcharts().hideLoading();
@@ -516,6 +539,7 @@ function setChart(id, objDt) {
             },
 
             plotOptions: {
+
                 line: {
                     dataLabels: {
                         enabled: false,
@@ -726,9 +750,6 @@ function setChart(id, objDt) {
 }
 
 
-
-
-
 function startLine() {
     return [134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
         134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
@@ -737,7 +758,7 @@ function startLine() {
         800, 800, 800, 800, 800, 800, 800, 800, 800,
         800, 800, 800, 800, 800, 800, 800, 800, 800,
         134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
-        134, 134, 134, 134, 134, 134, 134, 134, 134, 134, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+        134, 134, 134, 134, 134, 134, 134, 134, 134, 134, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     ];
 }
 

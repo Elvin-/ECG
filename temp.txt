@@ -1,6 +1,14 @@
-渐变色： http://jsfiddle.net/gh/get/jquery/1.9.1/highslide-software/highcharts.com/tree/master/samples/highcharts/demo/pie-monochrome/
+﻿渐变色： http://jsfiddle.net/gh/get/jquery/1.9.1/highslide-software/highcharts.com/tree/master/samples/highcharts/demo/pie-monochrome/
 不错的博客 : http://www.stepday.com/
 :http://hao.uisdc.com/
 http://www.peng8.net/categories/Highcharts/page/2/
 字体：http://fontawesome.io/icons/
 响应式教程: http://wf.uisdc.com/cn/layouts/rwd-fundamentals/
+
+http://joekuan.org/Learning_Highcharts_1st/
+http://joekuan.org/Learning_Highcharts_1st/
+https://github.com/TopCaver/Learning.Highcharts.zh_CN/blob/master/book/08.Highcharts_Events/08.02.Portfolio_history_example.md
+http://joekuan.org/
+
+
+http://www.retailscm.com/Learning/Learning-Highcharts/Highcharts-APIs/using-highcharts-apis/
