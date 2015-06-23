@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>模拟心电图</title>
+    <style type="text/css">
+    .main-body {
+        width: 100%;
+        height: 1000px;
+        text-align: center;
+        background-color: #ccc;
+        padding-top: 50px;
+        margin: 0 auto;
+    }
+    
+    .chart {
+        min-width: 300px;
+        max-width: 800px;
+        height: 300px;
+        margin: 1em auto;
+    }
+    
+    .modal {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .modal .chart {
+        height: 90%;
+        width: 90%;
+        max-width: none;
+    }
+    </style>
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script src="./js/highstock.js"></script>
+    <script src="./js/exporting.js"></script>
+    <script src="./dataLast.js"></script>
+    <script>
+    $(function() {
+        var dt = getObj();
+        if (dt && dt.msg !== false) {
+            setChart("ecgChart", dt);
+        } else {
+            $('#msg').show();
+        }
+
+    });
+    </script>
+</head>
+
+<body>
+    <div class="main-body chart-container">
+        <div id="report"></div>
+        <div id="BigImg"></div>
+        <input type="button" value="全屏" onclick="fullScr();">
+        <button id="btn_deleteDT1" onclick="moveECG();">拖动心电图</button>
+        <button id="btn_deleteDT1" onclick="RemoveExc();">删除异常</button>
+        <button id="btn_deleteDT2" onclick="addExc();">添加异常</button>
+        <button id="btn_deleteDT3" onclick="deleteECG();">删除心电图</button>
+        <div id="ecgChart" class="chart"></div>
+    </div>
+</body>
+
+</html>

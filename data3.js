@@ -20,7 +20,9 @@ Highcharts.setOptions({
     }
 });
 
-var G_selectPbId = null;
+var G_selectPbId = null,
+    G_selectStart = null,
+    G_selectEnd = null;
 
 function showDetails(t) {
     $.dialog({
@@ -102,8 +104,24 @@ function fullScr() {
     $('.chart').highcharts().reflow();
 }
 
-function addEC() {
+function deleteECG() {
+    if (G_selectStart && G_selectEnd) {
+        var chart = $('#ecgChart').highcharts();
+        var addObj = [{
+            value: G_selectStart,
+            color: '#000000',
+            dashStyle: 'solid'
+        }, {
+            value: G_selectEnd,
+            color: '#red',
+            dashStyle: 'Dot'
+        },];
+        console.log(chart.series[0].zones.concat(addObj));
 
+        chart.series[0].zones = chart.series[0].zones.concat(addObj);
+        chart.xAxis[0].removePlotBand('selected');
+        chart.redraw();
+    }
 }
 
 function RemoveExc() {
@@ -118,11 +136,11 @@ function addExc() {
     var objPb = {
         borderColor: 'red',
         borderWidth: 1,
-        color: '#FCFFC5',
+        color: 'rgba(69, 114, 167, 0.25)',
         from: 1429157535000,
         to: 1429157536000,
         id: 'p1',
-        //zIndex: 3,
+        zIndex: 3,
         label: {
             useHTML: true,
             textAlign: 'center',
@@ -137,8 +155,6 @@ function addExc() {
         events: {
             click: function(e) {
                 G_selectPbId = 'p1';
-                $report.html(Highcharts.dateFormat('%H:%M:%S:%L', this.options.from) + '--' + Highcharts.dateFormat('%H:%M:%S:%L', this.options.to) + '时长：' + Highcharts.dateFormat('%M:%S', this.options.to - this.options.from));
-                console.log(this);
             },
             dblclick: function() {
                 //showDetails(this.category);
@@ -267,11 +283,82 @@ function setChart(id, objDt) {
                 panKey: 'shift',
                 showAxes: true, //当一个空图动态的添加数据集时是否要显示轴，默认为false，不显示
                 // 一些事件 比如addSeries, click, load,redraw, selection
-                //                events: {
-                //                    load: function() {
-                //                        this.showLoading();
-                //                    }
-                //                }
+                events: {
+                    selection: function(evt) {
+                        // Get the xAxis selection
+                        var selectStart = Math.round(evt.xAxis[0].min);
+                        var selectEnd = Math.round(evt.xAxis[0].max);
+                        G_selectStart = selectStart;
+                        G_selectEnd = selectEnd;
+
+                        // We use plotBand to paint the selected area
+                        // to emulation 
+                        this.xAxis[0].removePlotBand('selected');
+                        this.xAxis[0].addPlotBand({
+                            color: 'rgba(69, 114, 167, 0.25)',
+                            id: 'selected',
+                            from: selectStart,
+                            to: selectEnd
+                        });
+
+                        // // Construct the series data from the selection
+                        // var selectedData = [];
+                        // var openData = [];
+
+                        // // Record the zoom index for other operations
+                        // chart.zoomXStart = -1;
+                        // chart.zoomXEnd = -1;
+
+                        // delete chart.futureDate;
+                        // for (var i = 0; i < this.series[0].data.length; i++) {
+                        //     var pt = this.series[0].data[i];
+
+                        //     // Since we make it not visible, we need to use
+                        //     // xData or processedXData to access the data
+                        //     var opX = this.series[1].xData[i];
+                        //     var opY = this.series[1].yData[i];
+                        //     if (pt.x >= selectStart && pt.x <= selectEnd) {
+                        //        if (chart.zoomXStart == -1) {
+                        //            chart.zoomXStart = i;
+                        //        }
+                        //        selectedData.push([pt.x, pt.y]);
+                        //        openData.push([opX, opY]);
+                        //     }
+
+                        //     // If we are plotting any future date, then record the
+                        //     // first future date
+                        //     if (pt.y == null && !chart.futureDate) {
+                        //         chart.futureDate = pt.x;
+                        //     }
+
+                        //     if (pt.x > selectEnd) {
+                        //        chart.zoomXEnd = i;
+                        //        break;
+                        //     }
+                        // } 
+
+                        // // Update the detail series
+                        // chart.series[0].setData(selectedData, false);
+                        // chart.series[1].setData(openData, false);
+
+                        // // Update the detail's title
+                        // chart.detailChart.setTitle({
+                        //   text: chart.stockName + " (" + chart.stockSymbol + ")",
+                        //   style: { fontFamily: 'palatino, serif', fontWeight: 'bold' }
+                        // }, {
+                        //   text: Highcharts.dateFormat('%e %b %y', selectStart) + ' -- ' +
+                        //         Highcharts.dateFormat('%e %b %y', selectEnd),
+                        //   style: { fontFamily: 'palatino, serif' }
+                        // });
+
+                        //chart.redraw();                             
+                        return false;
+                    },
+                    click: function(evt) {
+                        this.xAxis[0].removePlotBand('selected');
+                        return false;
+                    }
+                },
 
             },
             // 选中缩放的地方
@@ -361,11 +448,11 @@ function setChart(id, objDt) {
                     format: '{value:%H:%M:%S}'
 
                 },
-                events: {
-                    setExtremes: function(event) {
-                        console.log('event.min' + event.min);
-                    },
-                },
+                // events: {
+                //     setExtremes: function(event) {
+                //         console.log('event.min' + event.min);
+                //     },
+                // },
 
             },
             plotOptions: {
@@ -381,7 +468,7 @@ function setChart(id, objDt) {
                         enabled: false
                     }
                 },
-                pointStart: startdt + Hz + 400, // 第一个点的时间
+                pointStart: startdt + Hz , // 第一个点的时间
                 pointInterval: Hz, // 频率
                 pointIntervalUnit: 'milliseconds',
                 dashStyle: 'solid',
@@ -389,38 +476,29 @@ function setChart(id, objDt) {
                 zoneAxis: 'x',
                 lineWidth: 1,
 
-                zones: [{
-                        value: 1429157533000,
-                        color: '#000',
-                        dashStyle: 'solid'
-                    }, {
-                        value: 1429157534000,
-                        color: '#f7a35c',
-                        dashStyle: 'Dot'
-                    }, {
-                        color: '#000000', //设置折线的颜色
-                    }
-
+                zones: [
                 ],
                 enabled: true
-            }, {
-                type: 'line',
-                states: {
-                    hover: {
-                        enabled: false
-                    }
-                },
-                pointStart: startdt + Hz, // 第一个点的时间
-                pointInterval: Hz, // 频率
-                pointIntervalUnit: 'milliseconds',
-                data: startData,
-                step: true,
-                lineWidth: 1,
-                zones: [{
-                    color: '#000000', //设置折线的颜色
-                }],
-                enabled: true
-            }],
+            }
+            // , {
+            //     type: 'line',
+            //     states: {
+            //         hover: {
+            //             enabled: false
+            //         }
+            //     },
+            //     pointStart: startdt + Hz, // 第一个点的时间
+            //     pointInterval: Hz, // 频率
+            //     pointIntervalUnit: 'milliseconds',
+            //     data: startData,
+            //     step: true,
+            //     lineWidth: 1,
+            //     zones: [{
+            //         color: '#000000', //设置折线的颜色
+            //     }],
+            //     enabled: true
+            // }
+            ],
             credits: {
                 enabled: false,
                 // text: 'hk-bithealth.com',
