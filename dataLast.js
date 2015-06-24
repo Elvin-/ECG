@@ -22,7 +22,11 @@ Highcharts.setOptions({
 
 var G_selectPbId = null,
     G_selectStart = null,
-    G_selectEnd = null;
+    G_selectEnd = null,
+    G_deleteStart = null,
+    G_deleteEnd = null,
+    G_deleteName = null,
+    OLcount = 1;
 
 // 全屏
 function fullScr() {
@@ -33,18 +37,18 @@ function fullScr() {
 // GUID
 function guid() {
     function S4() {
-       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     }
-    return (S4()+S4()+""+S4()+""+S4()+""+S4()+""+S4()+S4()+S4());
+    return (S4() + S4() + "" + S4() + "" + S4() + "" + S4() + "" + S4() + S4() + S4());
 }
 
 //清除选择框
 function clearSelect() {
-	var chart = $('#ecgChart').highcharts();
+    var chart = $('#ecgChart').highcharts();
 
-	chart.xAxis[0].removePlotBand('selected');
-	G_selectStart = null;
-	G_selectEnd = null;
+    chart.xAxis[0].removePlotBand('selected');
+    G_selectStart = null;
+    G_selectEnd = null;
 }
 
 function deleteECG() {
@@ -68,55 +72,86 @@ function deleteECG() {
 
 //移除异常
 function RemoveExc() {
-    if (G_selectPbId) {
-        $('#ecgChart').highcharts().xAxis[0].removePlotBand(G_selectPbId);
-        G_selectPbId = null;
-    }
+    if (!G_selectPbId)
+        return;
+    $('#ecgChart').highcharts().xAxis[0].removePlotBand(G_selectPbId);
+    G_selectPbId = null;
+    updateOL('删除' + G_deleteStart + '到' + G_deleteEnd + '的 ”' + G_deleteName + '“ 异常');
 }
 
+//添加异常
 function addExc() {
-	if(!G_selectStart || !G_selectEnd)
-		return ;
-	var strId = guid();
-    var objPb = {
-        //borderColor: 'red',
-        // borderWidth: 1,
-        color: 'rgba(69, 114, 167, 0.25)',
-        from: G_selectStart,
-        to: G_selectEnd,
-        id: strId,
-        zIndex: 10,
-        label: {
-            useHTML: true,
-            textAlign: 'center',
-            text: Highcharts.dateFormat('%H:%M:%S:%L', G_selectStart) + '-' + Highcharts.dateFormat('%H:%M:%S:%L', G_selectEnd) + '</br>时长：' + Highcharts.dateFormat('%M:%S', G_selectEnd - G_selectStart) + '</br>异常',
-            align: 'center',
-            verticalAlign: 'top',
-            style: {
-                color: 'red',
-                fontSize: 10,
+    if (!G_selectStart || !G_selectEnd)
+        return;
+    $("#dialog").dialog({
+        modal: true,
+        width: 400,
+        buttons: [{
+            text: "取消",
+            click: function() {
+                $(this).dialog("close");
+                clearSelect();
             }
-        },
-        events: {
-            click: function(e) {
-            	this.options.borderColor = 'red';
-            	this.options.borderWidth = 2;
-            	$('#ecgChart').highcharts().xAxis[0].redraw();
-                G_selectPbId = strId;
+        }, {
+            text: "确认",
+            click: function() {
+                var strExc = $("#selectExc").val();
+                var strId = guid();
+                var strStart = Highcharts.dateFormat('%H:%M:%S:%L', G_selectStart);
+                var strEnd = Highcharts.dateFormat('%H:%M:%S:%L', G_selectEnd);
+                var strTime = Highcharts.dateFormat('%M:%S', G_selectEnd - G_selectStart);
+                var objPb = {
+                    // borderColor: 'yellow',
+                    // borderWidth: 1,
+                    color: 'rgba(69, 114, 167, 0.25)',
+                    from: G_selectStart,
+                    to: G_selectEnd,
+                    id: strId,
+                    excName: strExc,
+                    zIndex: 20,
+                    label: {
+                        useHTML: true,
+                        textAlign: 'center',
+                        text: strStart + '-' + strEnd + '</br>时长：' + strTime + '</br>异常:' + strExc,
+                        align: 'center',
+                        verticalAlign: 'top',
+                        style: {
+                            color: 'red',
+                            fontSize: 10,
+                        }
+                    },
+                    events: {
+                        click: function(e) {
+                            // this.options.borderColor = 'yellow';
+                            // this.options.borderWidth = 2;
+                            // this.axis.chart.render();
+                            G_selectPbId = strId;
+                            G_deleteStart = strStart;
+                            G_deleteEnd = strEnd;
+                            G_deleteName = strExc;
+                        }
+                    }
+                };
+                $('#ecgChart').highcharts().xAxis[0].addPlotBand(objPb);
+                clearSelect();
+                updateOL("将" + strStart + "到" + strEnd + "的心电图标记异常" + ' “' + strExc + '”');
+                $(this).dialog("close");
             }
-        }
-    };
-    $('#ecgChart').highcharts().xAxis[0].addPlotBand(objPb);
-    clearSelect();
+        }]
+    });
 }
 
 function moveECG() {
-	var chart = $('#ecgChart').highcharts();
-	console.log(chart);
-	chart.options.chart.pinchType = ' ';
-	chart.options.chart.zoomType = ' '
-	console.log(chart);
-	chart.redraw();
+        var chart = $('#ecgChart').highcharts();
+        console.log(chart);
+        chart.options.chart.pinchType = ' ';
+        chart.options.chart.zoomType = ' '
+        console.log(chart);
+        chart.redraw();
+    }
+    // update Operate List
+function updateOL(str) {
+    $("#operateList").append("(" + OLcount++ + ") " + str + "\n");
 }
 
 function setChart(id, objDt) {
@@ -178,13 +213,14 @@ function setChart(id, objDt) {
             endTime = objDt.endTime;
             break;
     }
+
     var cellHeight = (maxValue - minValue) / objDt.height * 10;
     //心电 ecgChart
     if (chartbox.length > 0 && id == "ecgChart") {
         // 创建highcharts
         var chart = new Highcharts.StockChart({
             chart: {
-                reflow: true,//图会根据当窗口或者框架改变大小时而改变
+                reflow: true, //图会根据当窗口或者框架改变大小时而改变
                 selectionMarkerFill: 'rgba(69,114,167,0.50)', //当选中某一区域时图会被放大，此时选中区域会有背景颜色
                 renderTo: id, // 对应的div id
                 //panning: true, //禁用放大
@@ -217,6 +253,7 @@ function setChart(id, objDt) {
                                 }
                             },
                         });
+                        console.log(evt);
                         return false;
                     },
                     click: function(evt) {
@@ -245,7 +282,7 @@ function setChart(id, objDt) {
                 },
                 inputDateFormat: '%Y-%m-%d %H:%M:%S:%L',
                 inputBoxWidth: 160,
-                selected: 0,                
+                selected: 0,
             },
             // 图表缩放导航
             navigator: {
@@ -308,24 +345,23 @@ function setChart(id, objDt) {
             },
 
             series: [{
-                    type: 'line',
-                    states: {
-                        hover: {
-                            enabled: false
-                        }
-                    },
-                    pointStart: startdt + Hz, // 第一个点的时间
-                    pointInterval: Hz, // 频率
-                    pointIntervalUnit: 'milliseconds',
-                    dashStyle: 'solid',
-                    data: objDt.data,
-                    zoneAxis: 'x',
-                    lineWidth: 1,
-                    color: '#000',
-                    zones: [],
-                    enabled: true
-                }                
-            ],
+                type: 'line',
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                },
+                pointStart: startdt + Hz, // 第一个点的时间
+                pointInterval: Hz, // 频率
+                pointIntervalUnit: 'milliseconds',
+                dashStyle: 'solid',
+                data: objDt.data,
+                zoneAxis: 'x',
+                lineWidth: 1,
+                color: '#000',
+                zones: [],
+                enabled: true
+            }],
             credits: {
                 enabled: false
             },
