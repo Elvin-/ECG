@@ -1275,7 +1275,7 @@ $(function () {
     var chart = new Highcharts.Chart({
         chart: {
             renderTo: 'container-area',
-            type: 'coloredarea',
+            type: 'coloredline',
             zoomType: 'xy',
             borderWidth: 5,
             borderColor: '#e8eaeb',

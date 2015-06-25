@@ -95,50 +95,54 @@ function addExc() {
         }, {
             text: "确认",
             click: function() {
-                var strExc = $("#selectExc").val();
-                var strId = guid();
-                var strStart = Highcharts.dateFormat('%H:%M:%S:%L', G_selectStart);
-                var strEnd = Highcharts.dateFormat('%H:%M:%S:%L', G_selectEnd);
-                var strTime = Highcharts.dateFormat('%M:%S', G_selectEnd - G_selectStart);
-                var objPb = {
-                    // borderColor: 'yellow',
-                    // borderWidth: 1,
-                    color: 'rgba(69, 114, 167, 0.25)',
-                    from: G_selectStart,
-                    to: G_selectEnd,
-                    id: strId,
-                    excName: strExc,
-                    zIndex: 20,
-                    label: {
-                        useHTML: true,
-                        textAlign: 'center',
-                        text: strStart + '-' + strEnd + '</br>时长：' + strTime + '</br>异常:' + strExc,
-                        align: 'center',
-                        verticalAlign: 'top',
-                        style: {
-                            color: 'red',
-                            fontSize: 10,
-                        }
-                    },
-                    events: {
-                        click: function(e) {
-                            // this.options.borderColor = 'yellow';
-                            // this.options.borderWidth = 2;
-                            // this.axis.chart.render();
-                            G_selectPbId = strId;
-                            G_deleteStart = strStart;
-                            G_deleteEnd = strEnd;
-                            G_deleteName = strExc;
-                        }
-                    }
-                };
-                $('#ecgChart').highcharts().xAxis[0].addPlotBand(objPb);
+                var excName = $("#selectExc").val();
+                addPlotBand(G_selectStart, G_selectEnd, excName);
+                updateOL("将" + Highcharts.dateFormat('%H:%M:%S:%L', G_selectStart) + "到" + Highcharts.dateFormat('%H:%M:%S:%L', G_selectEnd) + "的心电图标记异常" + ' “' + excName + '”');
                 clearSelect();
-                updateOL("将" + strStart + "到" + strEnd + "的心电图标记异常" + ' “' + strExc + '”');
                 $(this).dialog("close");
             }
         }]
     });
+}
+
+function addPlotBand(start, end, name) {
+    var strId = guid();
+    var strStart = Highcharts.dateFormat('%H:%M:%S:%L', start);
+    var strEnd = Highcharts.dateFormat('%H:%M:%S:%L', end);
+    var strTime = Highcharts.dateFormat('%M:%S', end - start);
+    var objPb = {
+        // borderColor: 'yellow',
+        // borderWidth: 1,
+        color: 'rgba(69, 114, 167, 0.25)',
+        from: start,
+        to: end,
+        id: strId,
+        excName: name,
+        zIndex: 20,
+        label: {
+            useHTML: true,
+            textAlign: 'center',
+            text: strStart + '-' + strEnd + '</br>时长：' + strTime + '</br>异常:' + name,
+            align: 'center',
+            verticalAlign: 'top',
+            style: {
+                color: 'red',
+                fontSize: 10,
+            }
+        },
+        events: {
+            click: function(e) {
+                // this.options.borderColor = 'yellow';
+                // this.options.borderWidth = 2;
+                // this.axis.chart.render();
+                G_selectPbId = strId;
+                G_deleteStart = strStart;
+                G_deleteEnd = strEnd;
+                G_deleteName = name;
+            }
+        }
+    };
+    $('#ecgChart').highcharts().xAxis[0].addPlotBand(objPb);
 }
 
 function moveECG() {
@@ -152,6 +156,13 @@ function moveECG() {
     // update Operate List
 function updateOL(str) {
     $("#operateList").append("(" + OLcount++ + ") " + str + "\n");
+}
+
+function initExc(excList) {
+    $.each(excList, function(i, obj) {
+        console.log(obj);
+        addPlotBand(obj.start, obj.end, obj.name);
+    });
 }
 
 function setChart(id, objDt) {
@@ -220,7 +231,7 @@ function setChart(id, objDt) {
         // 创建highcharts
         var chart = new Highcharts.StockChart({
             chart: {
-                reflow: true, //图会根据当窗口或者框架改变大小时而改变
+                //reflow: true, //图会根据当窗口或者框架改变大小时而改变
                 selectionMarkerFill: 'rgba(69,114,167,0.50)', //当选中某一区域时图会被放大，此时选中区域会有背景颜色
                 renderTo: id, // 对应的div id
                 //panning: true, //禁用放大
@@ -382,6 +393,8 @@ function setChart(id, objDt) {
             }
         }, function() {
             var plotband = this.get('a1');
+            var elist = getExcData();
+            initExc(elist);
         });
 
         $('<button>+</button>').insertBefore(chartbox).click(function() {
@@ -421,6 +434,22 @@ function startLine() {
         134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
         134, 134, 134, 134, 134, 134, 134, 134, 134, 134, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     ];
+}
+
+function getExcData() {
+    return [{
+        start: 1429157532000,
+        end: 1429157533000,
+        name: '心动过速'
+    }, {
+        start: 1429157535000,
+        end: 1429157536000,
+        name: '漏博'
+    }, {
+        start: 1429157536500,
+        end: 1429157537000,
+        name: '插入性早博'
+    }];
 }
 
 function getObj() {
