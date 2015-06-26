@@ -18,3 +18,5 @@ https://github.com/red42/HTML5_Genetic_Cars
 插件：
 标记：http://www.highcharts.com/plugin-registry/single/17/Annotations
 允许为每个部分定义不同颜色： http://www.highcharts.com/plugin-registry/single/33/Multicolor%20series
+
+https://gentlenode.com/journal/javascript-2-highcharts-cheatsheet/25

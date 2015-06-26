@@ -105,6 +105,7 @@ function addExc() {
     });
 }
 
+// 在心电图上添加异常块
 function addPlotBand(start, end, name) {
     var strId = guid();
     var strStart = Highcharts.dateFormat('%H:%M:%S:%L', start);
@@ -131,10 +132,17 @@ function addPlotBand(start, end, name) {
             }
         },
         events: {
+        	// 选中时高亮
             click: function(e) {
-                // this.options.borderColor = 'yellow';
-                // this.options.borderWidth = 2;
-                // this.axis.chart.render();
+            	var obj = this.axis.plotLinesAndBands;
+            	for (var i = 0; i < obj.length; i++) {
+            	    if (obj.id !== this.id) {
+            	    	// console.log(this.axis.plotLinesAndBands[i].svgElem);
+            	        //obj[i].svgElem.attr('fill','rgba(69, 114, 167, 0.25)');
+            	    }
+            	}
+            	this.svgElem.attr('fill','rgba(70, 32, 66, 0.25)');
+
                 G_selectPbId = strId;
                 G_deleteStart = strStart;
                 G_deleteEnd = strEnd;
@@ -145,19 +153,22 @@ function addPlotBand(start, end, name) {
     $('#ecgChart').highcharts().xAxis[0].addPlotBand(objPb);
 }
 
+// 删除心电图
 function moveECG() {
-        var chart = $('#ecgChart').highcharts();
-        console.log(chart);
-        chart.options.chart.pinchType = ' ';
-        chart.options.chart.zoomType = ' '
-        console.log(chart);
-        chart.redraw();
-    }
-    // update Operate List
+    var chart = $('#ecgChart').highcharts();
+    console.log(chart);
+    chart.options.chart.pinchType = ' ';
+    chart.options.chart.zoomType = ' '
+    console.log(chart);
+    chart.redraw();
+}
+
+// update Operate List
 function updateOL(str) {
     $("#operateList").append("(" + OLcount++ + ") " + str + "\n");
 }
 
+//初始化异常
 function initExc(excList) {
     $.each(excList, function(i, obj) {
         console.log(obj);
