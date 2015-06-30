@@ -70,19 +70,8 @@
     <script type="text/javascript" src="./js/jquery.min.js"></script>
     <script type="text/javascript" src="./js/jquery-ui.min.js"></script>
     <script src="./js/highstock.js"></script>
-    <script src="./js/exporting.js"></script>
     <script src="./dataLast.js"></script>
-    <script>
-    $(function() {
-        var dt = getObj();
-        if (dt && dt.msg !== false) {
-            setChart("ecgChart", dt);
-        } else {
-            $('#msg').show();
-        }
-
-    });
-    </script>
+    <script src="./js/plus.js"></script>
 </head>
 
 <body>
@@ -107,11 +96,12 @@
     <div class="main-body chart-container">
         <div id="report"></div>
         <div id="BigImg"></div>
-        <input type="button" value="全屏" onclick="fullScr();">
-        <button id="btn_deleteDT1" onclick="moveECG();">拖动心电图</button>
-        <button id="btn_deleteDT1" onclick="RemoveExc();">删除异常</button>
-        <button id="btn_deleteDT2" onclick="addExc();">添加异常</button>
-        <button id="btn_deleteDT3" onclick="deleteECG();">删除心电图</button>
+        <input type="button" id="btn_full" value="全屏" >
+        <button id="btn_addExc" >添加异常</button>
+        <button id="btn_delExc">删除异常</button>
+        <button id="btn_delECG">删除心电图</button>
+        <button id="btn_undo">撤销</button>
+        <button id="btn_back">还原</button>
         <div id="ecgChart" class="chart"></div>
         <span> 说明：Shift键 + 鼠标左键按下可以左右拖动，双击全屏显示</span>
         <table class="floorBox">
@@ -121,7 +111,7 @@
                     <textarea name="operateList" id="operateList" cols="80" rows="6"></textarea>
                 </td>
                 <td>
-                    <input type="button" class="btn1" value="还原到最初">
+                    <input type="button" class="btn1" id="btn_rese" value="还原到最初">
                     <br/>
                     <input type="button" class="btn1" value="重新分析">
                 </td>

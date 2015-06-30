@@ -57,6 +57,22 @@ $(function () {
 							}
 					}
 				}, {
+					title: '异常',
+					linkedTo: 'exc',
+					allowDragY: true,
+					allowDragX: false,   
+					anchorX: "center",
+					anchorY: "center",                      
+					shape: {
+							type: 'rect',
+							units: 'values',
+							params: {
+								stroke: '#c55',
+								x: 10,
+								y: 13,
+							}
+					}
+				}, {
 					title: 'on point <br> drag&drop <br> disabled',
 					linkedTo: 'high',
 					allowDragY: false,
@@ -109,7 +125,7 @@ $(function () {
 					}
 				}],
 				series: [{
-						data: [13, 4, 5, {y: 1, id: 'high'}, 2, 1, 3, 2, 11, 6, 5, 13, 6, 9, 11, 2, 3, 7, 9, 11]
+						data: [13, 4, 5, {y: 1, id: 'high'}, 2, 1, 3, 2, {y:11, id: 'exc'},{y:12, id: 'exc'}, 6, 5, 13, 6, 9, 11, 2, 3, 7, 9, 11]
 				}]
 		};
 		var chart = new Highcharts.StockChart(options);
